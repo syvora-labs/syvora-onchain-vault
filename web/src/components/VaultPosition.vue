@@ -126,31 +126,31 @@ onUnmounted(() => {
 .position-grid {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  margin-top: 0.5rem;
+  gap: 1.25rem;
+  margin-top: 0.25rem;
 }
 
 .position-item {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.3rem;
 }
 
 .position-label {
-  font-size: 0.75rem;
+  font-size: 0.68rem;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
   color: var(--color-text-muted);
 }
 
 .position-value {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--color-text);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--color-accent);
 }
 
 .symbol {
-  font-size: 0.875rem;
+  font-size: 0.9rem;
   color: var(--color-text-muted);
   font-weight: 400;
 }

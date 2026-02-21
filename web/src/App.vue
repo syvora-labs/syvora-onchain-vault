@@ -1,33 +1,18 @@
 <script setup lang="ts">
-/**
- * App.vue — root component and layout.
- *
- * Orchestrates the child components:
- *  - WalletConnect  (header right)
- *  - TokenBalance   (card)
- *  - DepositForm    (card)
- *  - VaultPosition  (card)
- *
- * When the wallet connects or a transaction completes, we call refresh() on
- * the relevant child components via template refs so their data stays current.
- */
 import { ref } from 'vue'
 import WalletConnect from './components/WalletConnect.vue'
 import TokenBalance  from './components/TokenBalance.vue'
 import DepositForm   from './components/DepositForm.vue'
 import VaultPosition from './components/VaultPosition.vue'
 
-// Template refs let us call methods exposed by child components
 const tokenBalanceRef  = ref<InstanceType<typeof TokenBalance> | null>(null)
 const vaultPositionRef = ref<InstanceType<typeof VaultPosition> | null>(null)
 
-/** Called when the wallet connects — refresh all on-chain data. */
 function onWalletConnected() {
   tokenBalanceRef.value?.refresh()
   vaultPositionRef.value?.refresh()
 }
 
-/** Called after a deposit — update both the balance and the vault position. */
 function onDeposited() {
   tokenBalanceRef.value?.refresh()
   vaultPositionRef.value?.refresh()
@@ -40,29 +25,34 @@ function onDeposited() {
     <header class="header">
       <div class="header-inner">
         <div class="logo">
-          <span class="logo-icon">⬡</span>
+          <span class="logo-icon">🌿</span>
           <span class="logo-text">Syvora Vault</span>
         </div>
         <WalletConnect @connected="onWalletConnected" />
       </div>
     </header>
 
-    <!-- ── Main content ── -->
+    <!-- ── Main ── -->
     <main class="main">
-      <div class="grid">
-        <TokenBalance ref="tokenBalanceRef" />
-        <DepositForm @deposited="onDeposited" />
-        <VaultPosition ref="vaultPositionRef" />
+      <div class="content">
+        <!-- Hero: big balance display -->
+        <div class="hero">
+          <TokenBalance ref="tokenBalanceRef" />
+        </div>
+
+        <!-- Actions: deposit + vault side by side -->
+        <div class="actions">
+          <DepositForm @deposited="onDeposited" />
+          <VaultPosition ref="vaultPositionRef" />
+        </div>
       </div>
     </main>
 
     <!-- ── Footer ── -->
     <footer class="footer">
       <p>
-        Learning project — deployed on
-        <a href="https://sepolia.etherscan.io" target="_blank" rel="noopener">
-          Sepolia testnet
-        </a>
+        Deployed on
+        <a href="https://sepolia.etherscan.io" target="_blank" rel="noopener">Sepolia testnet</a>
       </p>
     </footer>
   </div>
@@ -101,24 +91,32 @@ function onDeposited() {
   font-size: 1.125rem;
 }
 
-.logo-icon {
-  font-size: 1.5rem;
-  color: var(--color-accent);
-}
+.logo-icon { font-size: 1.4rem; }
 
 /* ── Main ── */
 .main {
   flex: 1;
-  padding: 2rem 1.5rem;
+  padding: 3rem 1.5rem 2rem;
 }
 
-.grid {
+.content {
   max-width: 960px;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+/* ── Actions grid ── */
+.actions {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
   align-items: start;
+}
+
+@media (max-width: 640px) {
+  .actions { grid-template-columns: 1fr; }
 }
 
 /* ── Footer ── */

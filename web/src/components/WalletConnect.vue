@@ -7,6 +7,7 @@
  */
 import { ref } from 'vue'
 import { useWallet } from '../composables/useWallet'
+import { REQUIRED_NETWORK_NAME } from '../contracts/addresses'
 
 const emit = defineEmits<{ connected: [] }>()
 
@@ -54,7 +55,7 @@ function shortenAddress(addr: string): string {
         <span v-if="isWrongNetwork" class="badge badge-warning">
           Wrong network
         </span>
-        <span v-else class="badge badge-success">Sepolia</span>
+        <span v-else class="badge badge-success">{{ REQUIRED_NETWORK_NAME }}</span>
 
         <!-- Truncated address -->
         <span class="address">{{ shortenAddress(address!) }}</span>

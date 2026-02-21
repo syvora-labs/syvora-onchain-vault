@@ -71,16 +71,24 @@ cd contracts && forge test
 
 ## Fast-forwarding the 7-day lock
 
-Requires [Foundry](https://book.getfoundry.sh/getting-started/installation) installed locally (`cast` is part of Foundry).
-
-You don't need to wait 7 days to test withdrawals. Run:
+You don't need to wait 7 days to test withdrawals. These `curl` commands work with no extra tooling:
 
 ```bash
 # Skip forward 7 days + 1 second
-cast rpc anvil_increaseTime 604801 --rpc-url http://localhost:8545
+curl -s -X POST http://localhost:8545 \
+  -H 'Content-Type: application/json' \
+  -d '{"jsonrpc":"2.0","method":"anvil_increaseTime","params":[604801],"id":1}'
 
 # Mine a block so the timestamp takes effect
-cast rpc anvil_mine --rpc-url http://localhost:8545
+curl -s -X POST http://localhost:8545 \
+  -H 'Content-Type: application/json' \
+  -d '{"jsonrpc":"2.0","method":"anvil_mine","params":[],"id":1}'
 ```
 
 Refresh the frontend — the Withdraw button will be active.
+
+> If you have [Foundry](https://book.getfoundry.sh/getting-started/installation) installed locally, you can use `cast` instead:
+> ```bash
+> cast rpc anvil_increaseTime 604801 --rpc-url http://localhost:8545
+> cast rpc anvil_mine --rpc-url http://localhost:8545
+> ```

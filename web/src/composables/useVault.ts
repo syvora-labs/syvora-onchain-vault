@@ -14,22 +14,20 @@ import { parseUnits, formatUnits } from 'ethers'
 import { useWallet } from './useWallet'
 import { useContracts } from './useContracts'
 
-
 /** Tracks which step of the deposit flow we are on. */
 export type DepositStep = 'idle' | 'approving' | 'depositing' | 'done'
 
 export function useVault() {
-  const { address, provider } = useWallet()
+  const { address } = useWallet()
   const { tokenContract, vaultContract } = useContracts()
 
   // ── State ──────────────────────────────────────────────────────────────────
 
-  const lockedAmount    = ref<bigint>(0n)   // raw uint256 from the contract
-  const unlocksAt       = ref<bigint>(0n)   // Unix timestamp as BigInt
-  const blockTimestamp  = ref<bigint>(0n)   // latest block timestamp from the chain
-  const isLoading       = ref(false)
-  const depositStep     = ref<DepositStep>('idle')
-  const error           = ref<string | null>(null)
+  const lockedAmount = ref<bigint>(0n)   // raw uint256 from the contract
+  const unlocksAt    = ref<bigint>(0n)   // Unix timestamp as BigInt
+  const isLoading    = ref(false)
+  const depositStep  = ref<DepositStep>('idle')
+  const error        = ref<string | null>(null)
 
   // ── Derived state ──────────────────────────────────────────────────────────
 
@@ -52,34 +50,24 @@ export function useVault() {
   /**
    * true  → tokens exist but lock has NOT expired yet
    * false → no tokens, or lock has expired (user can withdraw)
-   *
-   * Uses the latest block timestamp from the chain rather than Date.now() so
-   * that anvil_increaseTime (used in local testing) is reflected correctly.
    */
   const isStillLocked = computed<boolean>(() => {
     if (lockedAmount.value === 0n) return false
-    const now = blockTimestamp.value > 0n
-      ? blockTimestamp.value
-      : BigInt(Math.floor(Date.now() / 1000))
-    return now < unlocksAt.value
+    const nowSeconds = BigInt(Math.floor(Date.now() / 1000))
+    return nowSeconds < unlocksAt.value
   })
 
   const hasDeposit = computed(() => lockedAmount.value > 0n)
 
   // ── Actions ────────────────────────────────────────────────────────────────
 
-  /** Read the current position and latest block timestamp from the chain. */
+  /** Read the current position from the Vault contract. */
   async function refresh(): Promise<void> {
     if (!vaultContract.value || !address.value) return
     try {
-      const [positionResult, block] = await Promise.all([
-        vaultContract.value.getPosition(address.value) as Promise<[bigint, bigint]>,
-        provider.value?.getBlock('latest'),
-      ])
-      const [amount, unlock] = positionResult
-      lockedAmount.value   = amount
-      unlocksAt.value      = unlock
-      if (block) blockTimestamp.value = BigInt(block.timestamp)
+      const [amount, unlock] = await vaultContract.value.getPosition(address.value) as [bigint, bigint]
+      lockedAmount.value = amount
+      unlocksAt.value    = unlock
     } catch (e: unknown) {
       console.error('Failed to fetch vault position:', e)
     }

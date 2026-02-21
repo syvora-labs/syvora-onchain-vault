@@ -1,0 +1,22 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+solc = "0.8.27"
+
+# Remap OpenZeppelin so imports like "@openzeppelin/..." resolve correctly
+remappings = [
+    "@openzeppelin/=lib/openzeppelin-contracts/",
+]
+
+# ── Sepolia testnet ─────────────────────────────────────────────────────────
+# To deploy, run:
+#   forge script script/Deploy.s.sol --rpc-url sepolia --broadcast --verify
+#
+# Set your RPC URL via environment variable or replace the placeholder below.
+[rpc_endpoints]
+sepolia = "${SEPOLIA_RPC_URL}"
+
+# Etherscan-compatible API key for contract verification on Sepolia
+[etherscan]
+sepolia = { key = "${ETHERSCAN_API_KEY}", chain = 11155111 }

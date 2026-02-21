@@ -1,0 +1,38 @@
+# ── Foundry ───────────────────────────────────────────────────────────────────
+contracts/out/          # compiled contract artifacts
+contracts/cache/        # solc compilation cache
+contracts/broadcast/    # deployment transaction logs (contains private data)
+
+# ── Node / Vue / Vite ─────────────────────────────────────────────────────────
+node_modules/
+web/node_modules/
+web/dist/               # production build output
+web/.vite/              # Vite dev cache
+
+# ── Environment variables ──────────────────────────────────────────────────────
+# Never commit secrets. Copy .env.example and fill in locally.
+.env
+.env.local
+.env.*.local
+contracts/.env
+
+# ── OS files ──────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Editor / IDE ───────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*.suo
+
+# ── TypeScript ────────────────────────────────────────────────────────────────
+*.tsbuildinfo
+
+# ── Logs ──────────────────────────────────────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*

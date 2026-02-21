@@ -1,0 +1,44 @@
+services:
+
+  # ── 1. Local blockchain ──────────────────────────────────────────────────────
+  anvil:
+    image: ghcr.io/foundry-rs/foundry:latest
+    # entrypoint overrides the image's default so --host 0.0.0.0 is passed correctly.
+    # Without this, Anvil binds to 127.0.0.1 only and other containers can't reach it.
+    entrypoint: ["anvil", "--host", "0.0.0.0"]
+    ports:
+      - "8545:8545"
+    healthcheck:
+      # cast block-number succeeds as soon as Anvil is accepting connections
+      test: ["CMD-SHELL", "cast block-number --rpc-url http://localhost:8545"]
+      interval: 2s
+      timeout: 5s
+      retries: 20
+      start_period: 3s
+
+  # ── 2. Deploy contracts ──────────────────────────────────────────────────────
+  deployer:
+    image: ghcr.io/foundry-rs/foundry:latest
+    depends_on:
+      anvil:
+        condition: service_healthy   # wait until Anvil passes its healthcheck
+    volumes:
+      - .:/app                       # mount entire repo so deployer can write web/.env.local
+    working_dir: /app/contracts
+    entrypoint: ["/bin/sh", "/app/contracts/script/docker-deploy.sh"]
+    environment:
+      - RPC_URL=http://anvil:8545
+
+  # ── 3. Frontend dev server ───────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./web
+      dockerfile: Dockerfile.dev
+    depends_on:
+      deployer:
+        condition: service_completed_successfully  # wait until deployer exits cleanly
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./web:/app                   # live source — edits reload instantly
+      - /app/node_modules            # keep container's node_modules, don't overwrite with host

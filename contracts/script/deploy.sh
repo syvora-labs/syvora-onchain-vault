@@ -18,7 +18,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 CONTRACTS_DIR="$REPO_ROOT/contracts"
 ENV_FILE="$REPO_ROOT/.env"
-ADDRESSES_FILE="$REPO_ROOT/web/src/contracts/addresses.ts"
+ENV_LOCAL_FILE="$REPO_ROOT/web/.env.local"
 
 # ── Load .env ─────────────────────────────────────────────────────────────────
 if [[ ! -f "$ENV_FILE" ]]; then
@@ -43,7 +43,7 @@ FORGE_FLAGS="--rpc-url sepolia"
 if [[ "$DRY_RUN" == "true" ]]; then
   echo "=== DRY RUN — no transactions will be sent ==="
 else
-  FORGE_FLAGS="$FORGE_FLAGS --broadcast --verify"
+  FORGE_FLAGS="$FORGE_FLAGS --broadcast --verify --private-key $PRIVATE_KEY"
 fi
 
 # ── Run deploy script ─────────────────────────────────────────────────────────
@@ -70,7 +70,10 @@ VAULT_ADDR=$(echo "$OUTPUT"  | grep -i "Vault:"       | grep -oE '0x[0-9a-fA-F]{
 if [[ -z "$TOKEN_ADDR" || -z "$VAULT_ADDR" ]]; then
   echo ""
   echo "WARNING: Could not extract addresses from forge output."
-  echo "         Please update $ADDRESSES_FILE manually."
+  echo "         Please create $ENV_LOCAL_FILE manually with:"
+  echo "           VITE_TOKEN_ADDRESS=0x..."
+  echo "           VITE_VAULT_ADDRESS=0x..."
+  echo "           VITE_CHAIN_ID=11155111"
   exit 1
 fi
 
@@ -79,22 +82,19 @@ echo "=== Deployed addresses ==="
 echo "  SyvoraToken: $TOKEN_ADDR"
 echo "  Vault:       $VAULT_ADDR"
 
-# ── Patch web/src/contracts/addresses.ts ─────────────────────────────────────
-# Replace the placeholder zero addresses with the real ones.
-sed -i '' \
-  "s|syvoraToken: '0x0\+',|syvoraToken: '$TOKEN_ADDR',|" \
-  "$ADDRESSES_FILE"
-
-sed -i '' \
-  "s|vault:       '0x0\+',|vault:       '$VAULT_ADDR',|" \
-  "$ADDRESSES_FILE"
+# ── Write web/.env.local ──────────────────────────────────────────────────────
+# Vite automatically loads .env.local — no source code changes needed.
+cat > "$ENV_LOCAL_FILE" << EOF
+VITE_TOKEN_ADDRESS=$TOKEN_ADDR
+VITE_VAULT_ADDRESS=$VAULT_ADDR
+VITE_CHAIN_ID=11155111
+EOF
 
 echo ""
-echo "=== addresses.ts updated ==="
-echo "  $ADDRESSES_FILE"
+echo "=== web/.env.local written ==="
+echo "  $ENV_LOCAL_FILE"
 echo ""
 echo "Next steps:"
-echo "  1. Verify the addresses look correct in addresses.ts"
-echo "  2. Run: cd web && npm run dev"
-echo "  3. Make sure MetaMask is on Sepolia and fund your wallet with test ETH"
+echo "  1. Run: cd web && npm run dev"
+echo "  2. Make sure MetaMask is on Sepolia and fund your wallet with test ETH"
 echo "     Faucets: https://sepoliafaucet.com  |  https://faucet.quicknode.com/ethereum/sepolia"

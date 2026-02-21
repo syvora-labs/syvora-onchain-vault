@@ -46,7 +46,7 @@ export function useContracts() {
   const tokenContract = computed<SyvoraTokenContract | null>(() => {
     if (!signer.value) return null
     return new Contract(
-      ADDRESSES.sepolia.syvoraToken,
+      ADDRESSES.syvoraToken,
       SYVORATOKEN_ABI,
       signer.value
     ) as unknown as SyvoraTokenContract
@@ -59,7 +59,7 @@ export function useContracts() {
   const vaultContract = computed<VaultContract | null>(() => {
     if (!signer.value) return null
     return new Contract(
-      ADDRESSES.sepolia.vault,
+      ADDRESSES.vault,
       VAULT_ABI,
       signer.value
     ) as unknown as VaultContract

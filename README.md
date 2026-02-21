@@ -1,11 +1,11 @@
-# Syvora Onchain Vault
+# 🌿 Syvora Onchain Vault
 
 An Ethereum dapp consisting of two parts:
 
 - **`contracts/`** — a [Foundry](https://book.getfoundry.sh/) project with two Solidity contracts and a full unit test suite
 - **`web/`** — a [Vue 3](https://vuejs.org/) + TypeScript + Vite frontend that connects to MetaMask and interacts with the deployed contracts
 
-### What it does
+### 🌱 What it does
 
 1. **SyvoraToken (LRN)** — a standard ERC-20 token built with OpenZeppelin. The deployer receives 1,000,000 LRN and can mint more.
 2. **Vault** — a time-locked vault where users deposit LRN tokens. Deposits are locked for **7 days** before they can be withdrawn.
@@ -14,11 +14,13 @@ Target network: **Sepolia testnet**
 
 ---
 
-## Project structure
+## 🌲 Project structure
 
 ```
 syvora-onchain-vault/
-├── .env.example                  # required environment variables (copy → .env)
+├── docker-compose.yml            # local dev: anvil + deployer + frontend
+├── .env.example                  # required env vars for Sepolia deploy (copy → .env)
+├── GETTING_STARTED.md            # local testing guide (Docker)
 ├── contracts/
 │   ├── foundry.toml              # Foundry config (Solidity version, remappings, RPC)
 │   ├── src/
@@ -29,12 +31,14 @@ syvora-onchain-vault/
 │   │   └── Vault.t.sol           # 15 unit tests
 │   └── script/
 │       ├── Deploy.s.sol          # Foundry deploy script
-│       └── deploy.sh             # Shell helper: deploy + auto-patch frontend addresses
+│       ├── deploy.sh             # Sepolia: deploy + write web/.env.local
+│       └── docker-deploy.sh      # Docker: deploy to Anvil + write web/.env.local
 └── web/
+    ├── Dockerfile.dev            # frontend dev container
     └── src/
         ├── contracts/
         │   ├── abis.ts           # Human-readable ABIs for ethers.js
-        │   └── addresses.ts      # Deployed contract addresses (fill after deploy)
+        │   └── addresses.ts      # Reads addresses from VITE_* env vars
         ├── composables/
         │   ├── useWallet.ts      # MetaMask connection state
         │   ├── useContracts.ts   # Typed ethers.js contract instances
@@ -49,22 +53,29 @@ syvora-onchain-vault/
 
 ---
 
-## Prerequisites
+## 🍃 Prerequisites
 
 | Tool | Purpose | Install |
 |------|---------|---------|
-| [Foundry](https://book.getfoundry.sh/getting-started/installation) | Compile, test, and deploy Solidity | `curl -L https://foundry.paradigm.xyz \| bash && foundryup` |
-| [Node.js](https://nodejs.org/) v18+ | Run the Vue frontend | Via [nvm](https://github.com/nvm-sh/nvm) or direct download |
-| [MetaMask](https://metamask.io/) | Browser wallet for the frontend | Browser extension |
+| 🐳 [Docker Desktop](https://www.docker.com/products/docker-desktop/) | Local blockchain + deploy + frontend (all-in-one) | Download from Docker |
+| 🦊 [MetaMask](https://metamask.io/) | Browser wallet for the frontend | Browser extension |
+| ⚒️ [Foundry](https://book.getfoundry.sh/getting-started/installation) | Compile, test, and deploy to Sepolia (optional) | `curl -L https://foundry.paradigm.xyz \| bash && foundryup` |
+| 🟢 [Node.js](https://nodejs.org/) v18+ | Run the frontend outside Docker (optional) | Via [nvm](https://github.com/nvm-sh/nvm) or direct download |
 
 ---
 
-## 1. Clone and install dependencies
+## 🌊 1. Clone and install dependencies
 
 ```bash
 git clone <your-repo-url>
 cd syvora-onchain-vault
+```
 
+**For local testing with Docker** — no further setup needed. See [GETTING_STARTED.md](GETTING_STARTED.md).
+
+**For Sepolia deploy or running tests manually** — install dependencies first:
+
+```bash
 # Install Solidity dependencies (forge-std + OpenZeppelin)
 cd contracts && forge install && cd ..
 
@@ -74,7 +85,7 @@ cd web && npm install && cd ..
 
 ---
 
-## 2. Run the contract tests locally
+## 🧪 2. Run the contract tests locally
 
 No wallet or testnet needed — Foundry spins up an in-memory EVM.
 
@@ -112,7 +123,7 @@ Suite result: ok. 10 passed; 0 failed
 
 ---
 
-## 3. Deploy to Sepolia
+## 🚀 3. Deploy to Sepolia
 
 ### 3a. Set up environment variables
 
@@ -125,11 +136,10 @@ Open `.env` and fill in:
 | Variable | Where to get it |
 |----------|----------------|
 | `PRIVATE_KEY` | Export from MetaMask → Account Details → Show private key |
-| `DEPLOYER_ADDRESS` | Your wallet address (the one matching the key above) |
 | `SEPOLIA_RPC_URL` | Free from [Alchemy](https://alchemy.com) or [Infura](https://infura.io) |
 | `ETHERSCAN_API_KEY` | Free from [etherscan.io/myapikey](https://etherscan.io/myapikey) |
 
-> **Security:** use a dedicated testnet wallet. Never use a mainnet wallet or commit your `.env`.
+> 🔒 **Security:** use a dedicated testnet wallet. Never use a mainnet wallet or commit your `.env`.
 
 ### 3b. Get Sepolia test ETH
 
@@ -152,7 +162,7 @@ bash contracts/script/deploy.sh
 This will:
 1. Broadcast the deploy transactions to Sepolia
 2. Verify the source code on Etherscan (`--verify`)
-3. Automatically write the deployed addresses into `web/src/contracts/addresses.ts`
+3. Automatically write the deployed addresses into `web/.env.local`
 
 You can also run the Forge command directly:
 
@@ -163,7 +173,7 @@ forge script script/Deploy.s.sol --rpc-url sepolia --broadcast --verify
 
 ---
 
-## 4. Run the frontend locally
+## 🌿 4. Run the frontend locally
 
 ```bash
 cd web
@@ -184,7 +194,7 @@ Open [http://localhost:5173](http://localhost:5173) in the browser where MetaMas
 
 ---
 
-## Key concepts demonstrated
+## 🌍 Key concepts demonstrated
 
 | Concept | Where |
 |---------|-------|

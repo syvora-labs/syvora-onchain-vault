@@ -1,20 +1,23 @@
 /**
- * Deployed contract addresses per network.
+ * Contract addresses and network config.
  *
- * Fill these in after running:
- *   forge script script/Deploy.s.sol --rpc-url sepolia --broadcast --verify
+ * Values are read from Vite env vars so the same build works for both
+ * local Anvil and Sepolia without editing source code.
  *
- * The deploy script will print the addresses to the console.
+ * For local Docker:  written automatically by contracts/script/docker-deploy.sh
+ * For Sepolia:       written automatically by contracts/script/deploy.sh
+ * For manual setup:  create web/.env.local and add:
+ *
+ *   VITE_TOKEN_ADDRESS=0x...
+ *   VITE_VAULT_ADDRESS=0x...
+ *   VITE_CHAIN_ID=31337        # 31337 = Anvil local, 11155111 = Sepolia
  */
+
 export const ADDRESSES = {
-  sepolia: {
-    syvoraToken: '0x0000000000000000000000000000000000000000', // TODO: fill after deploy
-    vault:       '0x0000000000000000000000000000000000000000', // TODO: fill after deploy
-  },
-} as const
+  syvoraToken: (import.meta.env.VITE_TOKEN_ADDRESS as string) || '0x0000000000000000000000000000000000000000',
+  vault:       (import.meta.env.VITE_VAULT_ADDRESS as string) || '0x0000000000000000000000000000000000000000',
+}
 
-/** Sepolia chain ID — used to verify the user is on the right network. */
-export const REQUIRED_CHAIN_ID = 11155111
+export const REQUIRED_CHAIN_ID: number = Number(import.meta.env.VITE_CHAIN_ID) || 11155111
 
-/** Human-readable network name shown in error messages. */
-export const REQUIRED_NETWORK_NAME = 'Sepolia'
+export const REQUIRED_NETWORK_NAME = REQUIRED_CHAIN_ID === 31337 ? 'Anvil (local)' : 'Sepolia'

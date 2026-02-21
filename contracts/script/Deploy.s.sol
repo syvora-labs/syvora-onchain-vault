@@ -35,10 +35,11 @@ import "../src/Vault.sol";
  */
 contract Deploy is Script {
     function run() external {
-        // vm.envAddress reads an environment variable and casts it to address.
-        // If the variable is missing the script aborts with a clear error.
-        // Alternatively, pass --sender <addr> to override on the CLI.
-        address deployer = vm.envAddress("DEPLOYER_ADDRESS");
+        // msg.sender is automatically set to whichever address is broadcasting:
+        //  - Local:   the address derived from --private-key on the CLI
+        //  - Sepolia: the address derived from PRIVATE_KEY in .env
+        // No env variable needed — works for both local and testnet deploys.
+        address deployer = msg.sender;
 
         // Log so we can confirm the right wallet is being used before signing.
         console.log("Deploying from:    ", deployer);
@@ -46,10 +47,10 @@ contract Deploy is Script {
         console.log("---");
 
         // ── Start recording transactions ─────────────────────────────────────
-        // vm.startBroadcast(pk) signs all subsequent transactions with the
-        // private key stored in the PRIVATE_KEY env variable.
-        // The deployer address is derived from that key automatically.
-        vm.startBroadcast(vm.envUint("PRIVATE_KEY"));
+        // vm.startBroadcast() with no arguments uses whatever key was supplied:
+        //  - via --private-key on the CLI, or
+        //  - via PRIVATE_KEY in .env (loaded automatically by Foundry)
+        vm.startBroadcast();
 
         // 1. Deploy SyvoraToken
         //    Pass `deployer` as the initial owner so the correct wallet

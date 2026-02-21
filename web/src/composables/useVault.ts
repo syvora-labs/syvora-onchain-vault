@@ -88,7 +88,8 @@ export function useVault() {
 
     try {
       // parseUnits("100", 18) → 100000000000000000000n
-      const amount = parseUnits(amountStr, 18)
+      // String() guards against Vue coercing number inputs to JS numbers at runtime
+      const amount = parseUnits(String(amountStr), 18)
 
       // Step 1 — Approve
       depositStep.value = 'approving'

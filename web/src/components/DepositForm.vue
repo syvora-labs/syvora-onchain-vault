@@ -77,9 +77,8 @@ async function handleDeposit() {
       <div class="input-group">
         <input
           v-model="amountInput"
-          type="number"
-          min="0"
-          step="any"
+          type="text"
+          inputmode="decimal"
           placeholder="Amount (LRN)"
           class="input"
           :disabled="isLoading"

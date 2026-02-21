@@ -9,16 +9,21 @@
  *  - BrowserProvider  wraps window.ethereum and exposes the eth_ JSON-RPC API
  *  - JsonRpcSigner    an account that can sign transactions
  */
-import { ref, computed } from 'vue'
+import { ref, shallowRef, computed } from 'vue'
 import { BrowserProvider, JsonRpcSigner } from 'ethers'
-import { REQUIRED_CHAIN_ID, REQUIRED_NETWORK_NAME } from '../contracts/addresses'
+import { REQUIRED_CHAIN_ID } from '../contracts/addresses'
 
 // ── Module-level shared state ────────────────────────────────────────────────
 // These refs persist between component mounts/unmounts because they live
 // outside any Vue component lifecycle.
+//
+// signer and provider use shallowRef instead of ref: ethers v6 uses private
+// class fields (#field) internally. Vue's deep ref proxy makes `this` inside
+// ethers methods point to the Proxy rather than the real instance, breaking
+// private field access. shallowRef keeps the object un-proxied.
 const address  = ref<string | null>(null)
-const signer   = ref<JsonRpcSigner | null>(null)
-const provider = ref<BrowserProvider | null>(null)
+const signer   = shallowRef<JsonRpcSigner | null>(null)
+const provider = shallowRef<BrowserProvider | null>(null)
 const chainId  = ref<number | null>(null)
 
 // ── Event listeners (set up once at module load) ─────────────────────────────
@@ -68,9 +73,14 @@ export function useWallet() {
     chainId.value = Number(network.chainId)
 
     if (chainId.value !== REQUIRED_CHAIN_ID) {
-      throw new Error(
-        `Wrong network. Please switch MetaMask to ${REQUIRED_NETWORK_NAME} (chain ${REQUIRED_CHAIN_ID}).`
-      )
+      // Ask MetaMask to switch automatically rather than just throwing.
+      // wallet_switchEthereumChain takes the chain ID as a 0x-prefixed hex string.
+      await window.ethereum.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: `0x${REQUIRED_CHAIN_ID.toString(16)}` }],
+      })
+      // The chainChanged event will fire and reload the page, so we stop here.
+      return
     }
 
     // getSigner() returns an object that signs transactions with the connected account

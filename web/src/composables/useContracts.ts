@@ -28,7 +28,11 @@ export interface SyvoraTokenContract {
 }
 
 export interface VaultContract {
-  getPosition(user: string): Promise<[bigint, bigint]>
+  getPosition(user: string): Promise<[bigint, bigint, bigint, bigint]>
+  pendingRewards(user: string): Promise<bigint>
+  claimRewards(): Promise<ContractTransactionResponse>
+  fundRewardPool(amount: bigint): Promise<ContractTransactionResponse>
+  rewardPool(): Promise<bigint>
   deposit(amount: bigint): Promise<ContractTransactionResponse>
   withdraw(): Promise<ContractTransactionResponse>
   getAddress(): Promise<string>

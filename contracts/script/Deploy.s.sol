@@ -59,8 +59,15 @@ contract Deploy is Script {
         console.log("SyvoraToken:       ", address(token));
 
         // 2. Deploy Vault, pointing it at the token we just deployed.
-        Vault vault = new Vault(address(token));
+        //    Pass deployer as the vault owner so they can fund the reward pool.
+        Vault vault = new Vault(address(token), deployer);
         console.log("Vault:             ", address(vault));
+
+        // 3. Fund the reward pool with 100,000 LRN so users can claim rewards.
+        uint256 rewardAmount = 100_000 * 10 ** 18;
+        token.approve(address(vault), rewardAmount);
+        vault.fundRewardPool(rewardAmount);
+        console.log("Reward pool funded:", rewardAmount / 1e18, "LRN");
 
         vm.stopBroadcast();
         // ── Transactions complete ─────────────────────────────────────────────

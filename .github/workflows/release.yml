@@ -1,0 +1,27 @@
+name: Create Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create GitHub release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="v$(date +'%Y.%m.%d')-${GITHUB_SHA::7}"
+          gh release create "$TAG" \
+            --title "Release $TAG" \
+            --notes "Source release from commit [\`${GITHUB_SHA::7}\`](https://github.com/${{ github.repository }}/commit/$GITHUB_SHA)" \
+            --target "$GITHUB_SHA"

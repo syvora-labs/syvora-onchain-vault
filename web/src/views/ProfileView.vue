@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, watch } from 'vue'
+import { onMounted, onUnmounted, watch } from 'vue'
 import { useWallet } from '../composables/useWallet'
 import { useVault } from '../composables/useVault'
 import { useRewards } from '../composables/useRewards'
@@ -43,18 +43,25 @@ function refreshAll() {
 
 onMounted(() => {
   if (isConnected.value) refreshAll()
+  pollTimer = setInterval(() => { if (isConnected.value) refreshRewards() }, 30_000)
+})
+
+onUnmounted(() => {
+  clearInterval(pollTimer)
 })
 
 watch(address, (addr) => {
   if (addr) refreshAll()
 })
 
+let pollTimer: ReturnType<typeof setInterval>
+
 function formatUnlockDate(d: Date): string {
   return d.toLocaleString(undefined, {
-    year:   'numeric',
-    month:  'short',
-    day:    'numeric',
-    hour:   '2-digit',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
     minute: '2-digit',
   })
 }
@@ -104,12 +111,8 @@ function formatEventDate(timestamp: bigint): string {
             </div>
           </div>
 
-          <button
-            class="btn"
-            :class="isStillLocked ? 'btn-ghost' : 'btn-primary'"
-            :disabled="isStillLocked || isLoadingPosition"
-            @click="withdraw"
-          >
+          <button class="btn" :class="isStillLocked ? 'btn-ghost' : 'btn-primary'"
+            :disabled="isStillLocked || isLoadingPosition" @click="withdraw">
             {{ isLoadingPosition ? 'Withdrawing…' : isStillLocked ? 'Withdraw (locked)' : 'Withdraw' }}
           </button>
         </template>
@@ -129,11 +132,7 @@ function formatEventDate(timestamp: bigint): string {
 
         <p v-if="claimError" class="error-text">{{ claimError }}</p>
 
-        <button
-          class="btn btn-primary"
-          :disabled="pendingRewards === 0n || isClaiming"
-          @click="claim"
-        >
+        <button class="btn btn-primary" :disabled="pendingRewards === 0n || isClaiming" @click="claim">
           {{ isClaiming ? 'Claiming…' : 'Claim Rewards' }}
         </button>
 
@@ -151,15 +150,8 @@ function formatEventDate(timestamp: bigint): string {
         <div v-else-if="events.length === 0" class="empty-text">No transactions yet.</div>
 
         <ul v-else class="history-list">
-          <li
-            v-for="ev in events"
-            :key="`${ev.txHash}-${ev.logIndex}`"
-            class="history-row"
-          >
-            <span
-              class="badge"
-              :class="ev.type === 'Deposited' ? 'badge-deposit' : 'badge-withdraw'"
-            >
+          <li v-for="ev in events" :key="`${ev.txHash}-${ev.logIndex}`" class="history-row">
+            <span class="badge" :class="ev.type === 'Deposited' ? 'badge-deposit' : 'badge-withdraw'">
               {{ ev.type === 'Deposited' ? 'Deposit' : 'Withdraw' }}
             </span>
 
@@ -167,12 +159,7 @@ function formatEventDate(timestamp: bigint): string {
 
             <span class="history-date">{{ formatEventDate(ev.timestamp) }}</span>
 
-            <a
-              :href="`${explorerBase}/tx/${ev.txHash}`"
-              target="_blank"
-              rel="noopener"
-              class="history-link"
-            >
+            <a :href="`${explorerBase}/tx/${ev.txHash}`" target="_blank" rel="noopener" class="history-link">
               ↗
             </a>
           </li>
@@ -261,8 +248,15 @@ function formatEventDate(timestamp: bigint): string {
   border-radius: 999px;
 }
 
-.status-locked   { background: #fff3cd; color: #856404; }
-.status-unlocked { background: #d4f4e8; color: #1a7a50; }
+.status-locked {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-unlocked {
+  background: #d4f4e8;
+  color: #1a7a50;
+}
 
 /* ── Reward display ── */
 .reward-amount {
@@ -305,7 +299,9 @@ function formatEventDate(timestamp: bigint): string {
   color: #fff;
 }
 
-.btn-primary:not(:disabled):hover { opacity: 0.85; }
+.btn-primary:not(:disabled):hover {
+  opacity: 0.85;
+}
 
 .btn-ghost {
   background: transparent;
@@ -313,7 +309,9 @@ function formatEventDate(timestamp: bigint): string {
   color: var(--color-text-muted);
 }
 
-.btn-ghost:hover { background: var(--color-border); }
+.btn-ghost:hover {
+  background: var(--color-border);
+}
 
 /* ── Error / loading ── */
 .error-text {
@@ -347,7 +345,9 @@ function formatEventDate(timestamp: bigint): string {
   border-bottom: 1px solid var(--color-border);
 }
 
-.history-row:last-child { border-bottom: none; }
+.history-row:last-child {
+  border-bottom: none;
+}
 
 .badge {
   font-size: 0.7rem;
@@ -358,8 +358,15 @@ function formatEventDate(timestamp: bigint): string {
   text-transform: uppercase;
 }
 
-.badge-deposit  { background: #d4f4e8; color: #1a7a50; }
-.badge-withdraw { background: #fde8d8; color: #a0430a; }
+.badge-deposit {
+  background: #d4f4e8;
+  color: #1a7a50;
+}
+
+.badge-withdraw {
+  background: #fde8d8;
+  color: #a0430a;
+}
 
 .history-amount {
   font-variant-numeric: tabular-nums;
@@ -378,5 +385,7 @@ function formatEventDate(timestamp: bigint): string {
   font-size: 0.9rem;
 }
 
-.history-link:hover { text-decoration: underline; }
+.history-link:hover {
+  text-decoration: underline;
+}
 </style>

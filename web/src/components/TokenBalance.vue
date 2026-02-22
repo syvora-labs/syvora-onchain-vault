@@ -86,4 +86,18 @@ defineExpose({ refresh })
 .refresh-btn:not(:disabled):hover {
     opacity: 1;
 }
+
+@media (max-width: 480px) {
+    .hero-balance {
+        padding: 1.5rem 1rem 2rem;
+    }
+
+    .balance-amount {
+        font-size: 2.75rem;
+    }
+
+    .balance-symbol {
+        font-size: 1.25rem;
+    }
+}
 </style>

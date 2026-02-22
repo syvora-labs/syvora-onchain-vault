@@ -24,7 +24,9 @@ const noticeDismissed = ref(false)
                     <RouterLink to="/profile" class="nav-link" active-class="nav-link--active">Profile</RouterLink>
                 </nav>
 
-                <WalletConnect />
+                <div class="wallet-wrapper">
+                    <WalletConnect />
+                </div>
             </div>
         </header>
 
@@ -187,5 +189,51 @@ const noticeDismissed = ref(false)
 .footer a {
     color: var(--color-accent);
     text-decoration: none;
+}
+
+.wallet-wrapper {
+    flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+    .header {
+        height: auto;
+        padding: 0.5rem 1rem;
+    }
+
+    .header-inner {
+        flex-wrap: wrap;
+        row-gap: 0.25rem;
+    }
+
+    .nav {
+        order: 3;
+        flex: 0 0 100%;
+        padding-left: 0;
+        padding-top: 0.5rem;
+        border-top: 1px solid var(--color-border);
+    }
+
+    .local-notice {
+        padding: 0.75rem 1rem;
+    }
+
+    .local-notice-inner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.35rem;
+        position: relative;
+        padding-right: 2rem;
+    }
+
+    .local-notice-dismiss {
+        position: absolute;
+        top: 0;
+        right: 0;
+    }
+
+    .main {
+        padding: 1.5rem 1rem 1.5rem;
+    }
 }
 </style>

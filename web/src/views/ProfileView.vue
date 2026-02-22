@@ -395,4 +395,32 @@ function formatEventDate(timestamp: bigint): string {
 .history-link:hover {
     text-decoration: underline;
 }
+
+@media (max-width: 480px) {
+    .card {
+        padding: 1.25rem 1rem;
+    }
+
+    .content {
+        gap: 1rem;
+    }
+
+    .history-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.4rem;
+        column-gap: 0.6rem;
+    }
+
+    .history-link {
+        margin-left: auto;
+    }
+
+    .history-date {
+        flex: 0 0 100%;
+        white-space: normal;
+        order: 4;
+    }
+}
 </style>

@@ -14,10 +14,10 @@
  */
 
 export const ADDRESSES = {
-  syvoraToken: (import.meta.env.VITE_TOKEN_ADDRESS as string) || '0x0000000000000000000000000000000000000000',
-  vault:       (import.meta.env.VITE_VAULT_ADDRESS as string) || '0x0000000000000000000000000000000000000000',
-}
+    syvoraToken: (import.meta.env.VITE_TOKEN_ADDRESS as string) || "0x0000000000000000000000000000000000000000",
+    vault: (import.meta.env.VITE_VAULT_ADDRESS as string) || "0x0000000000000000000000000000000000000000",
+};
 
-export const REQUIRED_CHAIN_ID: number = Number(import.meta.env.VITE_CHAIN_ID) || 11155111
+export const REQUIRED_CHAIN_ID: number = Number(import.meta.env.VITE_CHAIN_ID) || 11155111;
 
-export const REQUIRED_NETWORK_NAME = REQUIRED_CHAIN_ID === 31337 ? 'Anvil (local)' : 'Sepolia'
+export const REQUIRED_NETWORK_NAME = REQUIRED_CHAIN_ID === 31337 ? "Anvil (local)" : "Sepolia";

@@ -41,6 +41,11 @@ function refreshAll() {
   refreshHistory()
 }
 
+async function claimAndRefresh() {
+  await claim()
+  refreshHistory()
+}
+
 onMounted(() => {
   if (isConnected.value) refreshAll()
   pollTimer = setInterval(() => { if (isConnected.value) refreshRewards() }, 30_000)
@@ -132,7 +137,7 @@ function formatEventDate(timestamp: bigint): string {
 
         <p v-if="claimError" class="error-text">{{ claimError }}</p>
 
-        <button class="btn btn-primary" :disabled="pendingRewards === 0n || isClaiming" @click="claim">
+        <button class="btn btn-primary" :disabled="pendingRewards === 0n || isClaiming" @click="claimAndRefresh">
           {{ isClaiming ? 'Claiming…' : 'Claim Rewards' }}
         </button>
 
@@ -151,8 +156,15 @@ function formatEventDate(timestamp: bigint): string {
 
         <ul v-else class="history-list">
           <li v-for="ev in events" :key="`${ev.txHash}-${ev.logIndex}`" class="history-row">
-            <span class="badge" :class="ev.type === 'Deposited' ? 'badge-deposit' : 'badge-withdraw'">
-              {{ ev.type === 'Deposited' ? 'Deposit' : 'Withdraw' }}
+            <span
+              class="badge"
+              :class="{
+                'badge-deposit':  ev.type === 'Deposited',
+                'badge-withdraw': ev.type === 'Withdrawn',
+                'badge-claim':    ev.type === 'RewardClaimed',
+              }"
+            >
+              {{ ev.type === 'Deposited' ? 'Deposit' : ev.type === 'Withdrawn' ? 'Withdraw' : 'Claim' }}
             </span>
 
             <span class="history-amount">{{ ev.formattedAmount }} LRN</span>
@@ -361,6 +373,11 @@ function formatEventDate(timestamp: bigint): string {
 .badge-deposit {
   background: #d4f4e8;
   color: #1a7a50;
+}
+
+.badge-claim {
+  background: #e8e0f8;
+  color: #5b3fa6;
 }
 
 .badge-withdraw {

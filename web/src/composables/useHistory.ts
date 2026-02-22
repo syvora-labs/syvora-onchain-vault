@@ -15,7 +15,7 @@ import { VAULT_ABI } from '../contracts/abis'
 import { ADDRESSES } from '../contracts/addresses'
 
 export interface HistoryEvent {
-  type: 'Deposited' | 'Withdrawn'
+  type: 'Deposited' | 'Withdrawn' | 'RewardClaimed'
   amount: bigint
   formattedAmount: string
   timestamp: bigint        // Unix seconds as BigInt
@@ -51,16 +51,17 @@ export function useHistory() {
       // Read-only contract connected to provider (no signer)
       const contract = new Contract(ADDRESSES.vault, VAULT_ABI, provider.value)
 
-      // Query both event types in parallel.
-      // Non-null assertion is safe: both events are declared in VAULT_ABI.
-      const [depositedRaw, withdrawnRaw] = await Promise.all([
+      // Query all three event types in parallel.
+      // Non-null assertion is safe: all events are declared in VAULT_ABI.
+      const [depositedRaw, withdrawnRaw, claimedRaw] = await Promise.all([
         contract.queryFilter(contract.filters['Deposited']!(address.value), 0, 'latest'),
         contract.queryFilter(contract.filters['Withdrawn']!(address.value), 0, 'latest'),
+        contract.queryFilter(contract.filters['RewardClaimed']!(address.value), 0, 'latest'),
       ])
 
       // Collect unique block numbers to batch-fetch timestamps
       const blockNumbers = new Set<number>()
-      for (const log of [...depositedRaw, ...withdrawnRaw]) {
+      for (const log of [...depositedRaw, ...withdrawnRaw, ...claimedRaw]) {
         blockNumbers.add(log.blockNumber)
       }
 
@@ -101,8 +102,22 @@ export function useHistory() {
         }
       })
 
+      // Parse RewardClaimed events
+      const claimed: HistoryEvent[] = (claimedRaw as EventLog[]).map((log) => {
+        const amount = log.args[1] as bigint
+        return {
+          type: 'RewardClaimed' as const,
+          amount,
+          formattedAmount: formatAmount(amount),
+          timestamp: blockTimestamps.get(log.blockNumber) ?? 0n,
+          txHash: log.transactionHash,
+          blockNumber: log.blockNumber,
+          logIndex: log.index,
+        }
+      })
+
       // Merge and sort newest-first
-      events.value = [...deposited, ...withdrawn].sort((a, b) => {
+      events.value = [...deposited, ...withdrawn, ...claimed].sort((a, b) => {
         const timeDiff = Number(b.timestamp - a.timestamp)
         if (timeDiff !== 0) return timeDiff
         if (b.blockNumber !== a.blockNumber) return b.blockNumber - a.blockNumber

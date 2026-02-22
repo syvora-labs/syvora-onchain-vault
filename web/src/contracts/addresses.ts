@@ -21,3 +21,5 @@ export const ADDRESSES = {
 export const REQUIRED_CHAIN_ID: number = Number(import.meta.env.VITE_CHAIN_ID) || 11155111;
 
 export const REQUIRED_NETWORK_NAME = REQUIRED_CHAIN_ID === 31337 ? "Anvil (local)" : "Sepolia";
+
+export const LOCAL_SETUP_NOTICE: boolean = import.meta.env.VITE_LOCAL_SETUP_NOTICE === "true";

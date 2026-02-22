@@ -1,9 +1,13 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { RouterView, RouterLink } from 'vue-router'
 import WalletConnect from './components/WalletConnect.vue'
 import { useWallet } from './composables/useWallet'
+import { LOCAL_SETUP_NOTICE } from './contracts/addresses'
 
 const { isConnected } = useWallet()
+
+const noticeDismissed = ref(false)
 </script>
 
 <template>
@@ -24,15 +28,24 @@ const { isConnected } = useWallet()
             </div>
         </header>
 
+        <div v-if="LOCAL_SETUP_NOTICE && !noticeDismissed" class="local-notice">
+            <div class="local-notice-inner">
+                <span class="local-notice-label">Local setup required</span>
+                <p class="local-notice-text">
+                    The contracts run on a local Anvil node. Start them with
+                    <code>docker compose up</code>, then add
+                    <code>http://localhost:8545</code> (Chain ID&nbsp;31337) as a network in MetaMask and connect.
+                </p>
+                <button class="local-notice-dismiss" @click="noticeDismissed = true" aria-label="Dismiss">✕</button>
+            </div>
+        </div>
+
         <main class="main">
             <RouterView />
         </main>
 
         <footer class="footer">
-            <p>
-                Deployed on
-                <a href="https://sepolia.etherscan.io" target="_blank" rel="noopener">Sepolia testnet</a>
-            </p>
+            <p>Powered by a local Anvil node via Docker Compose</p>
         </footer>
     </div>
 </template>
@@ -102,6 +115,60 @@ const { isConnected } = useWallet()
 .nav-link--active {
     color: var(--color-text);
     border-bottom-color: var(--color-accent);
+}
+
+.local-notice {
+    background: #fef9ec;
+    border-bottom: 1px solid #f0d060;
+    padding: 0.75rem 1.5rem;
+}
+
+.local-notice-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+}
+
+.local-notice-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #a07000;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.local-notice-text {
+    font-size: 0.875rem;
+    color: #7a5800;
+    margin: 0;
+}
+
+.local-notice-text code {
+    font-family: monospace;
+    background: #faecc0;
+    padding: 0.1em 0.35em;
+    border-radius: 0.25rem;
+    font-size: 0.85em;
+}
+
+.local-notice-dismiss {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: #a07000;
+    padding: 0.1rem 0.25rem;
+    line-height: 1;
+    flex-shrink: 0;
+    opacity: 0.6;
+}
+
+.local-notice-dismiss:hover {
+    opacity: 1;
 }
 
 .main {

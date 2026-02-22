@@ -65,7 +65,7 @@ export function useVault() {
   async function refresh(): Promise<void> {
     if (!vaultContract.value || !address.value) return
     try {
-      const [amount, unlock] = await vaultContract.value.getPosition(address.value) as [bigint, bigint]
+      const [amount, unlock, _depositedAt, _rewardDebt] = await vaultContract.value.getPosition(address.value)
       lockedAmount.value = amount
       unlocksAt.value    = unlock
     } catch (e: unknown) {

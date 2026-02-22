@@ -1,22 +1,9 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { RouterView, RouterLink } from 'vue-router'
 import WalletConnect from './components/WalletConnect.vue'
-import TokenBalance  from './components/TokenBalance.vue'
-import DepositForm   from './components/DepositForm.vue'
-import VaultPosition from './components/VaultPosition.vue'
+import { useWallet } from './composables/useWallet'
 
-const tokenBalanceRef  = ref<InstanceType<typeof TokenBalance> | null>(null)
-const vaultPositionRef = ref<InstanceType<typeof VaultPosition> | null>(null)
-
-function onWalletConnected() {
-  tokenBalanceRef.value?.refresh()
-  vaultPositionRef.value?.refresh()
-}
-
-function onDeposited() {
-  tokenBalanceRef.value?.refresh()
-  vaultPositionRef.value?.refresh()
-}
+const { isConnected } = useWallet()
 </script>
 
 <template>
@@ -26,26 +13,21 @@ function onDeposited() {
       <div class="header-inner">
         <div class="logo">
           <span class="logo-icon">🌿</span>
-          <span class="logo-text">Syvora Vault</span>
+          <RouterLink to="/" class="logo-text">Syvora Vault</RouterLink>
         </div>
-        <WalletConnect @connected="onWalletConnected" />
+
+        <nav v-if="isConnected" class="nav">
+          <RouterLink to="/" class="nav-link" active-class="nav-link--active" exact>Home</RouterLink>
+          <RouterLink to="/profile" class="nav-link" active-class="nav-link--active">Profile</RouterLink>
+        </nav>
+
+        <WalletConnect />
       </div>
     </header>
 
     <!-- ── Main ── -->
     <main class="main">
-      <div class="content">
-        <!-- Hero: big balance display -->
-        <div class="hero">
-          <TokenBalance ref="tokenBalanceRef" />
-        </div>
-
-        <!-- Actions: deposit + vault side by side -->
-        <div class="actions">
-          <DepositForm @deposited="onDeposited" />
-          <VaultPosition ref="vaultPositionRef" />
-        </div>
-      </div>
+      <RouterView />
     </main>
 
     <!-- ── Footer ── -->
@@ -81,6 +63,7 @@ function onDeposited() {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 1rem;
 }
 
 .logo {
@@ -93,30 +76,39 @@ function onDeposited() {
 
 .logo-icon { font-size: 1.4rem; }
 
+.logo-text {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ── Nav ── */
+.nav {
+  display: flex;
+  gap: 1.25rem;
+  flex: 1;
+  padding-left: 1.5rem;
+}
+
+.nav-link {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  padding-bottom: 2px;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.nav-link:hover { color: var(--color-text); }
+
+.nav-link--active {
+  color: var(--color-text);
+  border-bottom-color: var(--color-accent);
+}
+
 /* ── Main ── */
 .main {
   flex: 1;
   padding: 3rem 1.5rem 2rem;
-}
-
-.content {
-  max-width: 960px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 2.5rem;
-}
-
-/* ── Actions grid ── */
-.actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
-  align-items: start;
-}
-
-@media (max-width: 640px) {
-  .actions { grid-template-columns: 1fr; }
 }
 
 /* ── Footer ── */

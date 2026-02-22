@@ -29,14 +29,20 @@ export const SYVORATOKEN_ABI = [
 // ── Vault ───────────────────────────────────────────────────────────────────
 export const VAULT_ABI = [
   // Read
-  'function getPosition(address user) view returns (uint256 amount, uint256 unlocksAt)',
+  'function getPosition(address user) view returns (uint256 amount, uint256 unlocksAt, uint256 depositedAt, uint256 rewardDebt)',
+  'function pendingRewards(address user) view returns (uint256)',
+  'function rewardPool() view returns (uint256)',
   'function LOCK_DURATION() view returns (uint256)',
 
   // Write
   'function deposit(uint256 amount)',
   'function withdraw()',
+  'function claimRewards()',
+  'function fundRewardPool(uint256 amount)',
 
   // Events
   'event Deposited(address indexed user, uint256 amount, uint256 unlocksAt)',
   'event Withdrawn(address indexed user, uint256 amount)',
+  'event RewardClaimed(address indexed user, uint256 amount)',
+  'event RewardPoolFunded(address indexed funder, uint256 amount)',
 ] as const

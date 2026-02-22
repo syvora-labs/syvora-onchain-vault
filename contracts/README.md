@@ -1,66 +1,48 @@
-## Foundry
+# contracts/
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+Foundry project containing the Solidity smart contracts and their test suite.
 
-Foundry consists of:
+## Contracts
 
-- **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
-- **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
-- **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
-- **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+| Contract | Description |
+|----------|-------------|
+| `src/SyvoraToken.sol` | ERC-20 token (name: SyvoraToken, symbol: LRN). Deployer receives 1,000,000 LRN. Owner can mint more. |
+| `src/Vault.sol` | Time-locked vault. Users deposit LRN which is locked for 7 days. Includes a reward pool claimable by depositors. |
 
-## Documentation
+## Dependencies
 
-https://book.getfoundry.sh/
+Libraries are tracked as git submodules in `contracts/lib/`:
+- `forge-std` — Foundry test utilities
+- `openzeppelin-contracts` — ERC-20, Ownable, ReentrancyGuard
 
-## Usage
-
-### Build
-
-```shell
-$ forge build
+Pull them after cloning:
+```bash
+git submodule update --init --recursive
 ```
 
-### Test
+## Run tests
 
-```shell
-$ forge test
+No wallet or network needed — Foundry runs an in-memory EVM:
+
+```bash
+cd contracts
+forge test
 ```
 
-### Format
-
-```shell
-$ forge fmt
+Verbose output with gas costs:
+```bash
+forge test -v
 ```
 
-### Gas Snapshots
+## Deploy
 
-```shell
-$ forge snapshot
-```
+See the root [README.md](../README.md) for full Sepolia deployment instructions.
 
-### Anvil
+Quick reference:
+```bash
+# Dry run (no transactions sent)
+bash script/deploy.sh --dry-run
 
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
+# Deploy to Sepolia
+bash script/deploy.sh
 ```

@@ -67,19 +67,17 @@ syvora-onchain-vault/
 ## 🌊 1. Clone and install dependencies
 
 ```bash
-git clone <your-repo-url>
+git clone --recurse-submodules <your-repo-url>
 cd syvora-onchain-vault
 ```
 
+> If you already cloned without `--recurse-submodules`, run `git submodule update --init --recursive` to pull the Solidity libraries.
+
 **For local testing with Docker** — no further setup needed. See [GETTING_STARTED.md](GETTING_STARTED.md).
 
-**For Sepolia deploy or running tests manually** — install dependencies first:
+**For Sepolia deploy or running tests manually** — install frontend dependencies:
 
 ```bash
-# Install Solidity dependencies (forge-std + OpenZeppelin)
-cd contracts && forge install && cd ..
-
-# Install frontend dependencies
 cd web && npm install && cd ..
 ```
 

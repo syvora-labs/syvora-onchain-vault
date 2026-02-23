@@ -6,7 +6,7 @@ import { useWallet } from '../composables/useWallet'
 import PostCard from '../components/PostCard.vue'
 import AuthModal from '../components/AuthModal.vue'
 
-const { isAuthenticated, currentProfile, currentUser, signOut, linkWallet } = useAuth()
+const { isAuthenticated, currentProfile, signOut, linkWallet } = useAuth()
 const { posts, fetchPosts, createPost, deletePost, subscribe } = useForum()
 const { isConnected, address } = useWallet()
 

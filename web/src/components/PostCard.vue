@@ -5,6 +5,7 @@ import { useWallet } from '../composables/useWallet'
 import { useAuth } from '../composables/useAuth'
 import { VAULT_ABI } from '../contracts/abis'
 import { ADDRESSES } from '../contracts/addresses'
+import type { VaultContract } from '../composables/useContracts'
 import type { PostWithProfile } from '../composables/useForum'
 
 const props = defineProps<{
@@ -24,8 +25,8 @@ onMounted(async () => {
     const walletAddress = props.post.profiles?.wallet_address
     if (!walletAddress || !provider.value) return
     try {
-        const contract = new Contract(ADDRESSES.vault, VAULT_ABI, provider.value)
-        const [locked] = (await contract.getPosition(walletAddress)) as [bigint, ...bigint[]]
+        const contract = new Contract(ADDRESSES.vault, VAULT_ABI, provider.value) as unknown as VaultContract
+        const [locked] = await contract.getPosition(walletAddress)
         if (locked > 0n) {
             vaultBalance.value = Number(formatUnits(locked, 18)).toFixed(2)
         }

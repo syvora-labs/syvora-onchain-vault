@@ -32,13 +32,15 @@ services:
   # ── 3. Frontend dev server ───────────────────────────────────────────────────
   frontend:
     build:
-      context: ./web
-      dockerfile: Dockerfile.dev
+      context: .
+      dockerfile: web/Dockerfile.dev
     depends_on:
       deployer:
         condition: service_completed_successfully  # wait until deployer exits cleanly
     ports:
       - "5173:5173"
     volumes:
-      - ./web:/app                   # live source — edits reload instantly
-      - /app/node_modules            # keep container's node_modules, don't overwrite with host
+      - ./web:/repo/web
+      - ./packages:/repo/packages
+      - /repo/node_modules
+      - /repo/web/node_modules

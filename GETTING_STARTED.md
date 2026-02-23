@@ -7,9 +7,20 @@
 
 ---
 
-## 1. Start everything
+## 1. Add your Supabase credentials
 
-No environment variables needed — the Docker setup uses Anvil's built-in test accounts and handles everything automatically.
+The forum feature requires a [Supabase](https://supabase.com) project. Add these two values to `web/.env.local` (create the file if it doesn't exist yet):
+
+```bash
+VITE_SUPABASE_URL=https://<project-ref>.supabase.co
+VITE_SUPABASE_ANON_KEY=<anon-public-key>
+```
+
+Find them in your Supabase dashboard under **Project Settings → API**. Everything else is handled automatically.
+
+---
+
+## 2. Start everything
 
 ```bash
 docker compose up --build
@@ -18,14 +29,14 @@ docker compose up --build
 This starts three containers in order:
 
 1. **anvil** — local EVM blockchain on `http://localhost:8545`
-2. **deployer** — deploys the contracts and writes addresses to `web/.env.local`
+2. **deployer** — deploys the contracts and writes the contract addresses to `web/.env.local` (your Supabase vars are preserved)
 3. **frontend** — Vite dev server on `http://localhost:5173`
 
 Wait until you see `VITE ready` in the logs, then open [http://localhost:5173](http://localhost:5173).
 
 ---
 
-## 2. Configure MetaMask (once)
+## 3. Configure MetaMask (once)
 
 **Add the Anvil network:**
 1. MetaMask → Settings → Networks → Add a network manually
@@ -49,13 +60,20 @@ Wait until you see `VITE ready` in the logs, then open [http://localhost:5173](h
 
 ---
 
-## 3. Connect and test
+## 4. Connect and test
 
+**Vault**
 1. Open [http://localhost:5173](http://localhost:5173)
 2. Switch MetaMask to the **Anvil** network
 3. Click **Connect Wallet**
 4. Deposit LRN tokens into the vault
 5. Check your vault position
+
+**Forum**
+1. Click **Forum** in the nav bar
+2. Click **Sign in / Sign up** and create an account
+3. Post a message — it appears in the feed instantly
+4. Click **Link wallet** to attach your MetaMask address to your profile — your vault balance will show as a badge on your posts
 
 ---
 

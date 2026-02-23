@@ -43,10 +43,18 @@ echo "  VITE_TOKEN_ADDRESS=$TOKEN"
 echo "  VITE_VAULT_ADDRESS=$VAULT"
 echo "  VITE_CHAIN_ID=31337"
 
-cat > /app/web/.env.local << EOF
-VITE_TOKEN_ADDRESS=$TOKEN
-VITE_VAULT_ADDRESS=$VAULT
-VITE_CHAIN_ID=31337
-EOF
+set_env_var() {
+  local file="$1" key="$2" value="$3"
+  if grep -q "^${key}=" "$file" 2>/dev/null; then
+    sed -i "s|^${key}=.*|${key}=${value}|" "$file"
+  else
+    echo "${key}=${value}" >> "$file"
+  fi
+}
+
+touch /app/web/.env.local
+set_env_var /app/web/.env.local VITE_TOKEN_ADDRESS "$TOKEN"
+set_env_var /app/web/.env.local VITE_VAULT_ADDRESS "$VAULT"
+set_env_var /app/web/.env.local VITE_CHAIN_ID     "31337"
 
 echo "=== Done ==="

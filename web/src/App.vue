@@ -19,6 +19,7 @@ const noticeDismissed = ref(false)
         </template>
 
         <template #nav>
+            <RouterLink to="/forum" class="nav-link" active-class="nav-link--active">Forum</RouterLink>
             <template v-if="isConnected">
                 <RouterLink to="/" class="nav-link" active-class="nav-link--active" exact>Home</RouterLink>
                 <RouterLink to="/profile" class="nav-link" active-class="nav-link--active">Profile</RouterLink>

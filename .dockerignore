@@ -1,0 +1,10 @@
+node_modules
+web/node_modules
+packages/*/node_modules
+
+contracts/out
+contracts/cache
+contracts/broadcast
+
+.DS_Store
+.git

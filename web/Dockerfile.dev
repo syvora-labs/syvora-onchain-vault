@@ -1,13 +1,14 @@
 FROM node:20-alpine
 
-WORKDIR /app
+WORKDIR /repo
 
-# Copy package files first so this layer is cached between rebuilds
-COPY package*.json ./
+COPY package.json ./
+COPY packages/ui/package.json ./packages/ui/
+COPY web/package.json ./web/
+
 RUN npm install
 
-# Source is mounted as a volume at runtime — no COPY needed here
+WORKDIR /repo/web
 EXPOSE 5173
 
-# --host exposes the dev server on 0.0.0.0 so Docker can forward the port
 CMD ["npm", "run", "dev", "--", "--host"]

@@ -1,4 +1,4 @@
 {
-  "installCommand": "cd .. && npm install",
+  "installCommand": "cd .. && npm install --no-package-lock",
   "buildCommand": "npm run build"
 }

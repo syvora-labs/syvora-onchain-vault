@@ -2,6 +2,7 @@
 import { onMounted, onUnmounted } from 'vue'
 import { useWallet } from '../composables/useWallet'
 import { useVault } from '../composables/useVault'
+import { SyvoraCard, SyvoraDataRow, SyvoraBadge, SyvoraButton, SyvoraAlert } from '@syvora/ui'
 
 const { isConnected } = useWallet()
 const {
@@ -40,9 +41,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <div class="card">
-        <h2 class="card-title">Vault Position</h2>
-
+    <SyvoraCard title="Vault Position">
         <div v-if="!isConnected" class="placeholder">
             Connect your wallet to see your vault position.
         </div>
@@ -56,43 +55,41 @@ onUnmounted(() => {
 
             <template v-else>
                 <div class="position-grid">
-                    <div class="position-item">
-                        <span class="position-label">Locked</span>
-                        <span class="position-value">{{ formattedLocked }} <span class="symbol">LRN</span></span>
-                    </div>
+                    <SyvoraDataRow label="Locked">
+                        {{ formattedLocked }} <span class="symbol">LRN</span>
+                    </SyvoraDataRow>
 
-                    <div class="position-item">
-                        <span class="position-label">Unlocks at</span>
-                        <span class="position-value">
-                            {{ unlockDate ? formatDate(unlockDate) : '—' }}
-                        </span>
-                    </div>
+                    <SyvoraDataRow label="Unlocks at">
+                        {{ unlockDate ? formatDate(unlockDate) : '—' }}
+                    </SyvoraDataRow>
 
-                    <div class="position-item">
-                        <span class="position-label">Status</span>
-                        <span class="badge" :class="isStillLocked ? 'badge-warning' : 'badge-success'">
+                    <SyvoraDataRow label="Status">
+                        <SyvoraBadge :variant="isStillLocked ? 'warning' : 'success'">
                             {{ isStillLocked ? 'Locked' : 'Unlocked — ready to withdraw' }}
-                        </span>
-                    </div>
+                        </SyvoraBadge>
+                    </SyvoraDataRow>
                 </div>
 
-                <button class="btn btn-full mt-sm" :class="isStillLocked ? 'btn-ghost' : 'btn-primary'"
+                <SyvoraButton
+                    :variant="isStillLocked ? 'ghost' : 'primary'"
+                    full
                     :disabled="isStillLocked || isLoading"
                     :title="isStillLocked ? `Unlocks ${unlockDate ? formatDate(unlockDate) : 'soon'}` : ''"
-                    @click="withdraw">
+                    @click="withdraw"
+                >
                     <template v-if="isLoading">Withdrawing…</template>
                     <template v-else-if="isStillLocked">Withdraw (locked)</template>
                     <template v-else>Withdraw</template>
-                </button>
+                </SyvoraButton>
             </template>
 
-            <button class="btn btn-ghost btn-sm mt-sm" :disabled="isLoading" @click="refresh">
+            <SyvoraButton variant="ghost" size="sm" :disabled="isLoading" @click="refresh">
                 ↺ Refresh
-            </button>
+            </SyvoraButton>
 
-            <p v-if="error" class="error-msg mt-sm">{{ error }}</p>
+            <SyvoraAlert v-if="error" variant="error">{{ error }}</SyvoraAlert>
         </template>
-    </div>
+    </SyvoraCard>
 </template>
 
 <style scoped>
@@ -101,25 +98,6 @@ onUnmounted(() => {
     flex-direction: column;
     gap: 1.25rem;
     margin-top: 0.25rem;
-}
-
-.position-item {
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-}
-
-.position-label {
-    font-size: 0.68rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--color-text-muted);
-}
-
-.position-value {
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: var(--color-accent);
 }
 
 .symbol {

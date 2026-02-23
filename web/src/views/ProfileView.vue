@@ -4,6 +4,7 @@ import { useWallet } from '../composables/useWallet'
 import { useVault } from '../composables/useVault'
 import { useRewards } from '../composables/useRewards'
 import { useHistory } from '../composables/useHistory'
+import { SyvoraCard, SyvoraDataRow, SyvoraBadge, SyvoraButton, SyvoraAlert } from '@syvora/ui'
 
 const { isConnected, address } = useWallet()
 
@@ -84,48 +85,45 @@ function formatEventDate(timestamp: bigint): string {
         </div>
 
         <template v-else>
-            <div class="card">
-                <h2 class="card-title">Vault Position</h2>
+            <!-- Vault Position -->
+            <SyvoraCard title="Vault Position">
+                <div v-if="isLoadingPosition && !hasDeposit" class="muted-text">Loading…</div>
 
-                <div v-if="isLoadingPosition && !hasDeposit" class="loading-text">Loading…</div>
-
-                <div v-else-if="!hasDeposit" class="empty-text">
+                <div v-else-if="!hasDeposit" class="muted-text">
                     No tokens currently locked.
                 </div>
 
                 <template v-else>
                     <div class="position-grid">
-                        <div class="position-item">
-                            <span class="position-label">Locked</span>
-                            <span class="position-value">{{ formattedLocked }} <span class="symbol">LRN</span></span>
-                        </div>
+                        <SyvoraDataRow label="Locked">
+                            {{ formattedLocked }} <span class="symbol">LRN</span>
+                        </SyvoraDataRow>
 
-                        <div class="position-item">
-                            <span class="position-label">Unlocks at</span>
-                            <span class="position-value">
-                                {{ unlockDate ? formatUnlockDate(unlockDate) : '—' }}
-                            </span>
-                        </div>
+                        <SyvoraDataRow label="Unlocks at">
+                            {{ unlockDate ? formatUnlockDate(unlockDate) : '—' }}
+                        </SyvoraDataRow>
 
-                        <div class="position-item">
-                            <span class="position-label">Status</span>
-                            <span class="status-badge" :class="isStillLocked ? 'status-locked' : 'status-unlocked'">
+                        <SyvoraDataRow label="Status">
+                            <SyvoraBadge :variant="isStillLocked ? 'warning' : 'success'">
                                 {{ isStillLocked ? 'Locked' : 'Unlocked — ready to withdraw' }}
-                            </span>
-                        </div>
+                            </SyvoraBadge>
+                        </SyvoraDataRow>
                     </div>
 
-                    <button class="btn" :class="isStillLocked ? 'btn-ghost' : 'btn-primary'"
-                        :disabled="isStillLocked || isLoadingPosition" @click="withdraw">
+                    <SyvoraButton
+                        :variant="isStillLocked ? 'ghost' : 'primary'"
+                        :disabled="isStillLocked || isLoadingPosition"
+                        @click="withdraw"
+                    >
                         {{ isLoadingPosition ? 'Withdrawing…' : isStillLocked ? 'Withdraw (locked)' : 'Withdraw' }}
-                    </button>
+                    </SyvoraButton>
                 </template>
 
-                <p v-if="positionError" class="error-text">{{ positionError }}</p>
-            </div>
+                <SyvoraAlert v-if="positionError" variant="error">{{ positionError }}</SyvoraAlert>
+            </SyvoraCard>
 
-            <div class="card">
-                <h2 class="card-title">Rewards</h2>
+            <!-- Rewards -->
+            <SyvoraCard title="Rewards">
                 <p class="card-subtitle">5% APY · Claimable anytime</p>
 
                 <div class="reward-amount">
@@ -133,46 +131,44 @@ function formatEventDate(timestamp: bigint): string {
                     <span class="reward-unit">LRN</span>
                 </div>
 
-                <p v-if="claimError" class="error-text">{{ claimError }}</p>
+                <SyvoraAlert v-if="claimError" variant="error">{{ claimError }}</SyvoraAlert>
 
-                <button class="btn btn-primary" :disabled="pendingRewards === 0n || isClaiming"
-                    @click="claimAndRefresh">
+                <SyvoraButton
+                    variant="primary"
+                    :loading="isClaiming"
+                    :disabled="pendingRewards === 0n || isClaiming"
+                    @click="claimAndRefresh"
+                >
                     {{ isClaiming ? 'Claiming…' : 'Claim Rewards' }}
-                </button>
+                </SyvoraButton>
 
-                <button class="btn btn-ghost" @click="refreshRewards">Refresh</button>
-            </div>
+                <SyvoraButton variant="ghost" @click="refreshRewards">Refresh</SyvoraButton>
+            </SyvoraCard>
 
-            <div class="card">
-                <h2 class="card-title">Transaction History</h2>
+            <!-- Transaction History -->
+            <SyvoraCard title="Transaction History">
+                <SyvoraAlert v-if="historyError" variant="error">{{ historyError }}</SyvoraAlert>
 
-                <p v-if="historyError" class="error-text">{{ historyError }}</p>
+                <div v-if="isLoadingHistory" class="muted-text">Loading history…</div>
 
-                <div v-if="isLoadingHistory" class="loading-text">Loading history…</div>
-
-                <div v-else-if="events.length === 0" class="empty-text">No transactions yet.</div>
+                <div v-else-if="events.length === 0" class="muted-text">No transactions yet.</div>
 
                 <ul v-else class="history-list">
                     <li v-for="ev in events" :key="`${ev.txHash}-${ev.logIndex}`" class="history-row">
-                        <span class="badge" :class="{
-                            'badge-deposit': ev.type === 'Deposited',
-                            'badge-withdraw': ev.type === 'Withdrawn',
-                            'badge-claim': ev.type === 'RewardClaimed',
-                        }">
+                        <SyvoraBadge :variant="ev.type === 'Deposited' ? 'deposit' : ev.type === 'Withdrawn' ? 'withdraw' : 'claim'">
                             {{ ev.type === 'Deposited' ? 'Deposit' : ev.type === 'Withdrawn' ? 'Withdraw' : 'Claim' }}
-                        </span>
+                        </SyvoraBadge>
 
                         <span class="history-amount">{{ ev.formattedAmount }} LRN</span>
 
                         <span class="history-date">{{ formatEventDate(ev.timestamp) }}</span>
 
-                        <a :href="`${explorerBase}/tx/${ev.txHash}`" target="_blank" rel="noopener"
-                            class="history-link">
+                        <a :href="`${explorerBase}/tx/${ev.txHash}`" target="_blank" rel="noopener" class="history-link">
                             ↗
                         </a>
                     </li>
                 </ul>
-            </div>
+            </SyvoraCard>
         </template>
     </div>
 </template>
@@ -192,26 +188,15 @@ function formatEventDate(timestamp: bigint): string {
     padding: 3rem 0;
 }
 
-.card {
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: 0.75rem;
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-
-.card-title {
-    font-size: 1rem;
-    font-weight: 600;
-    margin: 0;
+.muted-text {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
 }
 
 .card-subtitle {
     font-size: 0.8rem;
     color: var(--color-text-muted);
-    margin: 0;
+    margin-top: -0.5rem;
 }
 
 .position-grid {
@@ -221,47 +206,10 @@ function formatEventDate(timestamp: bigint): string {
     margin-top: 0.25rem;
 }
 
-.position-item {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-}
-
-.position-label {
-    font-size: 0.68rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--color-text-muted);
-}
-
-.position-value {
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: var(--color-accent);
-}
-
 .symbol {
     font-size: 0.9rem;
     color: var(--color-text-muted);
     font-weight: 400;
-}
-
-.status-badge {
-    display: inline-block;
-    font-size: 0.75rem;
-    font-weight: 600;
-    padding: 0.25rem 0.6rem;
-    border-radius: 999px;
-}
-
-.status-locked {
-    background: #fff3cd;
-    color: #856404;
-}
-
-.status-unlocked {
-    background: #d4f4e8;
-    color: #1a7a50;
 }
 
 .reward-amount {
@@ -279,53 +227,6 @@ function formatEventDate(timestamp: bigint): string {
 
 .reward-unit {
     font-size: 1rem;
-    color: var(--color-text-muted);
-}
-
-.btn {
-    padding: 0.55rem 1.25rem;
-    border-radius: 0.5rem;
-    font-size: 0.9rem;
-    font-weight: 500;
-    cursor: pointer;
-    border: none;
-    transition: opacity 0.15s;
-    align-self: flex-start;
-}
-
-.btn:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-}
-
-.btn-primary {
-    background: var(--color-accent);
-    color: #fff;
-}
-
-.btn-primary:not(:disabled):hover {
-    opacity: 0.85;
-}
-
-.btn-ghost {
-    background: transparent;
-    border: 1px solid var(--color-border);
-    color: var(--color-text-muted);
-}
-
-.btn-ghost:hover {
-    background: var(--color-border);
-}
-
-.error-text {
-    font-size: 0.85rem;
-    color: var(--color-error, #e74c3c);
-    margin: 0;
-}
-
-.loading-text,
-.empty-text {
-    font-size: 0.9rem;
     color: var(--color-text-muted);
 }
 
@@ -351,30 +252,6 @@ function formatEventDate(timestamp: bigint): string {
     border-bottom: none;
 }
 
-.badge {
-    font-size: 0.7rem;
-    font-weight: 600;
-    padding: 0.2rem 0.5rem;
-    border-radius: 999px;
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
-}
-
-.badge-deposit {
-    background: #d4f4e8;
-    color: #1a7a50;
-}
-
-.badge-claim {
-    background: #e8e0f8;
-    color: #5b3fa6;
-}
-
-.badge-withdraw {
-    background: #fde8d8;
-    color: #a0430a;
-}
-
 .history-amount {
     font-variant-numeric: tabular-nums;
     font-size: 0.9rem;
@@ -397,10 +274,6 @@ function formatEventDate(timestamp: bigint): string {
 }
 
 @media (max-width: 480px) {
-    .card {
-        padding: 1.25rem 1rem;
-    }
-
     .content {
         gap: 1rem;
     }

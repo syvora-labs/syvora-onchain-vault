@@ -1,0 +1,5 @@
+{
+  "name": "syvora-onchain-vault",
+  "private": true,
+  "workspaces": ["web", "packages/*"]
+}

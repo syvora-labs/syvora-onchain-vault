@@ -17,3 +17,6 @@ contracts/broadcast/
 Thumbs.db
 
 .idea/
+node_modules
+dist
+dist-ssr

@@ -2,6 +2,7 @@
 import { onMounted } from 'vue'
 import { useToken } from '../composables/useToken'
 import { useWallet } from '../composables/useWallet'
+import { SyvoraButton } from '@syvora/ui'
 
 const { isConnected } = useWallet()
 const { formatted, isLoading, error, refresh } = useToken()
@@ -27,9 +28,9 @@ defineExpose({ refresh })
             <span class="balance-symbol">LRN</span>
         </div>
 
-        <button v-if="isConnected" class="btn btn-ghost btn-sm refresh-btn" :disabled="isLoading" @click="refresh">
+        <SyvoraButton v-if="isConnected" variant="ghost" size="sm" class="refresh-btn" :disabled="isLoading" @click="refresh">
             ↺ Refresh
-        </button>
+        </SyvoraButton>
     </div>
 </template>
 

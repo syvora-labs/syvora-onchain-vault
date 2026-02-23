@@ -10,7 +10,13 @@
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+
+    /* Path aliases for @syvora/ui */
+    "paths": {
+      "@syvora/ui": ["../packages/ui/src/index.ts"],
+      "@syvora/ui/*": ["../packages/ui/src/*"]
+    }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"]
 }

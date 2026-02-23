@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { useWallet } from '../composables/useWallet'
 import { REQUIRED_NETWORK_NAME } from '../contracts/addresses'
+import { SyvoraButton, SyvoraBadge, SyvoraAlert } from '@syvora/ui'
 
 const emit = defineEmits<{ connected: [] }>()
 
@@ -31,27 +32,23 @@ function shortenAddress(addr: string): string {
 <template>
     <div class="wallet-connect">
         <template v-if="!isConnected">
-            <button class="btn btn-primary" :disabled="isConnecting" @click="handleConnect">
+            <SyvoraButton variant="primary" :loading="isConnecting" :disabled="isConnecting" @click="handleConnect">
                 {{ isConnecting ? 'Connecting…' : 'Connect Wallet' }}
-            </button>
+            </SyvoraButton>
         </template>
 
         <template v-else>
             <div class="wallet-info">
-                <span v-if="isWrongNetwork" class="badge badge-warning">
-                    Wrong network
-                </span>
-                <span v-else class="badge badge-success">{{ REQUIRED_NETWORK_NAME }}</span>
+                <SyvoraBadge v-if="isWrongNetwork" variant="warning">Wrong network</SyvoraBadge>
+                <SyvoraBadge v-else variant="success">{{ REQUIRED_NETWORK_NAME }}</SyvoraBadge>
 
                 <span class="address">{{ shortenAddress(address!) }}</span>
 
-                <button class="btn btn-ghost btn-sm" @click="disconnect">
-                    Disconnect
-                </button>
+                <SyvoraButton variant="ghost" size="sm" @click="disconnect">Disconnect</SyvoraButton>
             </div>
         </template>
 
-        <p v-if="error" class="error-msg">{{ error }}</p>
+        <SyvoraAlert v-if="error" variant="error">{{ error }}</SyvoraAlert>
     </div>
 </template>
 

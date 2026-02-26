@@ -8,6 +8,8 @@ export interface PostWithProfile {
     created_at: string
     profiles: {
         username: string
+        display_name: string | null
+        avatar_url: string | null
         wallet_address: string | null
     }
 }
@@ -18,11 +20,21 @@ export function useForum() {
     async function fetchPosts() {
         const { data, error } = await supabase
             .from('posts')
-            .select('*, profiles(username, wallet_address)')
+            .select('*, profiles(username, display_name, avatar_url, wallet_address)')
             .order('created_at', { ascending: false })
             .limit(50)
         if (error) throw error
         posts.value = (data ?? []) as PostWithProfile[]
+    }
+
+    async function fetchPostsByUser(userId: string): Promise<PostWithProfile[]> {
+        const { data, error } = await supabase
+            .from('posts')
+            .select('*, profiles(username, display_name, avatar_url, wallet_address)')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false })
+        if (error) throw error
+        return (data ?? []) as PostWithProfile[]
     }
 
     async function createPost(content: string) {
@@ -51,5 +63,5 @@ export function useForum() {
         return () => supabase.removeChannel(channel)
     }
 
-    return { posts, fetchPosts, createPost, deletePost, subscribe }
+    return { posts, fetchPosts, fetchPostsByUser, createPost, deletePost, subscribe }
 }

@@ -5,6 +5,10 @@ import { supabase } from '../lib/supabase'
 export interface Profile {
     id: string
     username: string
+    display_name: string | null
+    bio: string | null
+    avatar_url: string | null
+    website: string | null
     wallet_address: string | null
     created_at: string
 }
@@ -69,6 +73,33 @@ export function useAuth() {
         await fetchProfile(currentUser.value.id)
     }
 
+    async function updateProfile(updates: {
+        display_name?: string | null
+        bio?: string | null
+        website?: string | null
+        avatar_url?: string | null
+    }) {
+        if (!currentUser.value) return
+        const { error } = await supabase
+            .from('profiles')
+            .update(updates)
+            .eq('id', currentUser.value.id)
+        if (error) throw error
+        await fetchProfile(currentUser.value.id)
+    }
+
+    async function uploadAvatar(file: File): Promise<string> {
+        if (!currentUser.value) throw new Error('Not authenticated')
+        const ext = file.name.split('.').pop() ?? 'jpg'
+        const path = `${currentUser.value.id}/avatar.${ext}`
+        const { error } = await supabase.storage
+            .from('avatars')
+            .upload(path, file, { upsert: true })
+        if (error) throw error
+        const { data } = supabase.storage.from('avatars').getPublicUrl(path)
+        return data.publicUrl
+    }
+
     return {
         currentUser,
         currentProfile,
@@ -77,5 +108,7 @@ export function useAuth() {
         signUp,
         signOut,
         linkWallet,
+        updateProfile,
+        uploadAvatar,
     }
 }

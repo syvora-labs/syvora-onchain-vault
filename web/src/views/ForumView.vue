@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { RouterLink } from 'vue-router'
 import { useAuth } from '../composables/useAuth'
 import { useForum } from '../composables/useForum'
 import { useWallet } from '../composables/useWallet'
@@ -83,7 +84,11 @@ async function handleLinkWallet() {
                 <h1 class="forum-title">Forum</h1>
                 <div class="header-actions">
                     <template v-if="isAuthenticated">
-                        <span class="current-user">@{{ currentProfile?.username }}</span>
+                        <RouterLink
+                            v-if="currentProfile"
+                            :to="`/u/${currentProfile.username}`"
+                            class="current-user"
+                        >@{{ currentProfile.username }}</RouterLink>
                         <button
                             v-if="canLinkWallet"
                             class="btn btn-ghost btn-sm"
@@ -192,6 +197,12 @@ async function handleLinkWallet() {
     font-size: 0.9rem;
     font-weight: 500;
     color: var(--color-text-muted, #aaa);
+    text-decoration: none;
+}
+
+.current-user:hover {
+    color: var(--color-text, #fff);
+    text-decoration: underline;
 }
 
 /* Buttons */

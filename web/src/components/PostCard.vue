@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { RouterLink } from 'vue-router'
 import { Contract, formatUnits } from 'ethers'
 import { useWallet } from '../composables/useWallet'
 import { useAuth } from '../composables/useAuth'
@@ -20,6 +21,19 @@ const { currentUser } = useAuth()
 const vaultBalance = ref<string | null>(null)
 
 const isOwnPost = computed(() => currentUser.value?.id === props.post.user_id)
+
+const avatarUrl = computed(() => props.post.profiles?.avatar_url ?? null)
+
+const avatarInitial = computed(() =>
+    (props.post.profiles?.username ?? '?').charAt(0).toUpperCase()
+)
+
+const avatarBg = computed(() => {
+    const name = props.post.profiles?.username ?? ''
+    let hash = 0
+    for (const ch of name) hash = ch.charCodeAt(0) + ((hash << 5) - hash)
+    return `hsl(${Math.abs(hash) % 360}, 55%, 38%)`
+})
 
 onMounted(async () => {
     const walletAddress = props.post.profiles?.wallet_address
@@ -45,7 +59,22 @@ function timeAgo(dateStr: string): string {
 <template>
     <div class="post-card">
         <div class="post-header">
-            <span class="username">@{{ post.profiles?.username }}</span>
+            <RouterLink
+                :to="`/u/${post.profiles?.username}`"
+                class="post-avatar"
+                :style="{ background: avatarBg }"
+            >
+                <img v-if="avatarUrl" :src="avatarUrl" :alt="post.profiles?.username" class="avatar-img" />
+                <span v-else class="avatar-initial">{{ avatarInitial }}</span>
+            </RouterLink>
+
+            <div class="post-meta">
+                <RouterLink :to="`/u/${post.profiles?.username}`" class="username">
+                    {{ post.profiles?.display_name ?? post.profiles?.username }}
+                </RouterLink>
+                <span class="username-handle">@{{ post.profiles?.username }}</span>
+            </div>
+
             <span v-if="vaultBalance" class="vault-badge">{{ vaultBalance }} LRN locked</span>
         </div>
 
@@ -74,13 +103,58 @@ function timeAgo(dateStr: string): string {
 .post-header {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.625rem;
     flex-wrap: wrap;
+}
+
+.post-avatar {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    text-decoration: none;
+}
+
+.avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-initial {
+    color: #fff;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.post-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.0625rem;
+    min-width: 0;
 }
 
 .username {
     font-weight: 600;
     font-size: 0.9375rem;
+    color: var(--color-text, #fff);
+    text-decoration: none;
+    line-height: 1.2;
+}
+
+.username:hover {
+    text-decoration: underline;
+}
+
+.username-handle {
+    font-size: 0.8125rem;
+    color: var(--color-text-muted, #888);
+    line-height: 1.2;
 }
 
 .vault-badge {
@@ -91,6 +165,7 @@ function timeAgo(dateStr: string): string {
     font-size: 0.75rem;
     font-weight: 500;
     padding: 0.125rem 0.625rem;
+    margin-left: auto;
 }
 
 .post-content {

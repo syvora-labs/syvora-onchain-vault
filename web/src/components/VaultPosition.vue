@@ -2,7 +2,7 @@
 import { onMounted, onUnmounted } from 'vue'
 import { useWallet } from '../composables/useWallet'
 import { useVault } from '../composables/useVault'
-import { SyvoraCard, SyvoraDataRow, SyvoraBadge, SyvoraButton, SyvoraAlert } from '@syvora/ui'
+import { SyvoraCard, SyvoraDataRow, SyvoraBadge, SyvoraButton, SyvoraAlert, SyvoraEmptyState } from '@syvora/ui'
 
 const { isConnected } = useWallet()
 const {
@@ -42,16 +42,14 @@ onUnmounted(() => {
 
 <template>
     <SyvoraCard title="Vault Position">
-        <div v-if="!isConnected" class="placeholder">
+        <SyvoraEmptyState v-if="!isConnected">
             Connect your wallet to see your vault position.
-        </div>
+        </SyvoraEmptyState>
 
-        <div v-else-if="isLoading && !hasDeposit" class="placeholder">Loading…</div>
+        <SyvoraEmptyState v-else-if="isLoading && !hasDeposit">Loading…</SyvoraEmptyState>
 
         <template v-else>
-            <div v-if="!hasDeposit" class="placeholder">
-                You have no tokens locked in the vault.
-            </div>
+            <SyvoraEmptyState v-if="!hasDeposit">You have no tokens locked in the vault.</SyvoraEmptyState>
 
             <template v-else>
                 <div class="position-grid">

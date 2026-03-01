@@ -4,7 +4,7 @@ import { useWallet } from '../composables/useWallet'
 import { useVault } from '../composables/useVault'
 import { useRewards } from '../composables/useRewards'
 import { useHistory } from '../composables/useHistory'
-import { SyvoraCard, SyvoraDataRow, SyvoraBadge, SyvoraButton, SyvoraAlert } from '@syvora/ui'
+import { SyvoraCard, SyvoraDataRow, SyvoraBadge, SyvoraButton, SyvoraAlert, SyvoraEmptyState } from '@syvora/ui'
 
 const { isConnected, address } = useWallet()
 
@@ -80,18 +80,16 @@ function formatEventDate(timestamp: bigint): string {
 
 <template>
     <div class="content">
-        <div v-if="!isConnected" class="empty-state">
-            <p>Connect your wallet to view your profile.</p>
-        </div>
+        <SyvoraEmptyState v-if="!isConnected">
+            Connect your wallet to view your profile.
+        </SyvoraEmptyState>
 
         <template v-else>
             <!-- Vault Position -->
             <SyvoraCard title="Vault Position">
-                <div v-if="isLoadingPosition && !hasDeposit" class="muted-text">Loading…</div>
+                <SyvoraEmptyState v-if="isLoadingPosition && !hasDeposit">Loading…</SyvoraEmptyState>
 
-                <div v-else-if="!hasDeposit" class="muted-text">
-                    No tokens currently locked.
-                </div>
+                <SyvoraEmptyState v-else-if="!hasDeposit">No tokens currently locked.</SyvoraEmptyState>
 
                 <template v-else>
                     <div class="position-grid">
@@ -149,9 +147,9 @@ function formatEventDate(timestamp: bigint): string {
             <SyvoraCard title="Transaction History">
                 <SyvoraAlert v-if="historyError" variant="error">{{ historyError }}</SyvoraAlert>
 
-                <div v-if="isLoadingHistory" class="muted-text">Loading history…</div>
+                <SyvoraEmptyState v-if="isLoadingHistory">Loading history…</SyvoraEmptyState>
 
-                <div v-else-if="events.length === 0" class="muted-text">No transactions yet.</div>
+                <SyvoraEmptyState v-else-if="events.length === 0">No transactions yet.</SyvoraEmptyState>
 
                 <ul v-else class="history-list">
                     <li v-for="ev in events" :key="`${ev.txHash}-${ev.logIndex}`" class="history-row">
@@ -182,16 +180,6 @@ function formatEventDate(timestamp: bigint): string {
     gap: 1.5rem;
 }
 
-.empty-state {
-    text-align: center;
-    color: var(--color-text-muted);
-    padding: 3rem 0;
-}
-
-.muted-text {
-    font-size: 0.9rem;
-    color: var(--color-text-muted);
-}
 
 .card-subtitle {
     font-size: 0.8rem;
@@ -245,7 +233,7 @@ function formatEventDate(timestamp: bigint): string {
     align-items: center;
     gap: 0.75rem;
     padding: 0.6rem 0;
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.07);
 }
 
 .history-row:last-child {

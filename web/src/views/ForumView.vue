@@ -6,6 +6,7 @@ import { useForum } from '../composables/useForum'
 import { useWallet } from '../composables/useWallet'
 import PostCard from '../components/PostCard.vue'
 import AuthModal from '../components/AuthModal.vue'
+import { SyvoraTextarea, SyvoraEmptyState } from '@syvora/ui'
 
 const { isAuthenticated, currentProfile, signOut, linkWallet } = useAuth()
 const { posts, fetchPosts, createPost, deletePost, subscribe } = useForum()
@@ -26,8 +27,6 @@ const canLinkWallet = computed(
         address.value &&
         !currentProfile.value?.wallet_address,
 )
-
-const charCount = computed(() => composerText.value.length)
 
 let unsubscribe: (() => void) | null = null
 
@@ -115,18 +114,18 @@ async function handleLinkWallet() {
 
             <!-- Composer -->
             <div v-if="isAuthenticated" class="composer">
-                <textarea
+                <SyvoraTextarea
                     v-model="composerText"
-                    class="composer-input"
                     placeholder="What's on your mind? (280 chars max)"
-                    maxlength="280"
-                    rows="3"
+                    :maxlength="280"
+                    :rows="3"
+                    class="composer-textarea"
                     @keydown.ctrl.enter="submitPost"
                     @keydown.meta.enter="submitPost"
                 />
                 <div class="composer-footer">
-                    <span class="char-count" :class="{ 'char-count--warn': charCount > 260 }">
-                        {{ charCount }}/280
+                    <span class="char-count" :class="{ 'char-count--warn': composerText.length > 260 }">
+                        {{ composerText.length }}/280
                     </span>
                     <button
                         class="btn btn-primary btn-sm"
@@ -141,9 +140,7 @@ async function handleLinkWallet() {
 
             <!-- Feed -->
             <div class="feed">
-                <div v-if="posts.length === 0" class="empty-state">
-                    No posts yet. Be the first!
-                </div>
+                <SyvoraEmptyState v-if="posts.length === 0">No posts yet. Be the first!</SyvoraEmptyState>
                 <PostCard
                     v-for="post in posts"
                     :key="post.id"
@@ -208,38 +205,46 @@ async function handleLinkWallet() {
 /* Buttons */
 .btn {
     border: none;
-    border-radius: 0.5rem;
+    border-radius: 0.625rem;
     cursor: pointer;
     font-size: 0.875rem;
     font-weight: 600;
     padding: 0.5rem 1rem;
-    transition: opacity 0.15s;
+    transition: opacity 0.15s, box-shadow 0.15s;
     line-height: 1;
 }
 
 .btn:disabled {
     cursor: not-allowed;
-    opacity: 0.5;
+    opacity: 0.38;
 }
 
 .btn-primary {
-    background: var(--color-accent, #4ade80);
+    background: linear-gradient(160deg, #34d067 0%, #16a34a 55%, #15803d 100%);
     color: #fff;
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.3) inset,
+        0 3px 10px rgba(22, 163, 74, 0.28);
 }
 
 .btn-primary:hover:not(:disabled) {
-    opacity: 0.85;
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.35) inset,
+        0 5px 16px rgba(22, 163, 74, 0.36);
+    opacity: 0.95;
 }
 
 .btn-ghost {
-    background: transparent;
-    border: 1px solid var(--color-border, #333);
-    color: var(--color-text-muted, #aaa);
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    color: var(--color-text);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset;
 }
 
 .btn-ghost:hover:not(:disabled) {
-    color: var(--color-text, #fff);
-    border-color: var(--color-text-muted, #aaa);
+    background: rgba(255, 255, 255, 0.8);
 }
 
 .btn-sm {
@@ -252,27 +257,28 @@ async function handleLinkWallet() {
     display: flex;
     flex-direction: column;
     gap: 0.625rem;
-    background: var(--color-surface, #1e1e1e);
-    border: 1px solid var(--color-border, #2a2a2a);
-    border-radius: 0.75rem;
-    padding: 1rem;
+    background: rgba(255, 255, 255, 0.68);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 1.25rem;
+    padding: 1.125rem;
+    box-shadow:
+        0 1.5px 0 rgba(255, 255, 255, 0.9) inset,
+        0 4px 16px rgba(0, 0, 0, 0.05),
+        0 12px 32px rgba(0, 0, 0, 0.06);
 }
 
-.composer-input {
+/* Override SyvoraTextarea border to be transparent inside the composer card */
+.composer-textarea :deep(.syvora-textarea) {
     background: transparent;
-    border: none;
-    color: var(--color-text, #fff);
-    font-family: inherit;
-    font-size: 0.9375rem;
-    line-height: 1.55;
-    outline: none;
-    resize: none;
-    width: 100%;
-    box-sizing: border-box;
+    border-color: transparent;
+    padding-left: 0;
+    padding-right: 0;
 }
 
-.composer-input::placeholder {
-    color: var(--color-text-muted, #666);
+.composer-textarea :deep(.syvora-textarea:focus) {
+    border-color: transparent;
 }
 
 .composer-footer {
@@ -304,12 +310,5 @@ async function handleLinkWallet() {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
-}
-
-.empty-state {
-    color: var(--color-text-muted, #888);
-    font-size: 0.9375rem;
-    padding: 2rem 0;
-    text-align: center;
 }
 </style>

@@ -43,11 +43,20 @@
 }
 
 .shell-header {
-    border-bottom: 1px solid var(--color-border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
     padding: 0 1.5rem;
     height: 4rem;
     display: flex;
     align-items: center;
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow:
+        0 1px 0 rgba(0, 0, 0, 0.05),
+        0 4px 24px rgba(0, 0, 0, 0.04);
 }
 
 .shell-header-inner {
@@ -86,21 +95,24 @@
 }
 
 :slotted(.nav-link) {
-    font-size: 0.9rem;
-    color: var(--color-text-muted);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: rgba(10, 26, 18, 0.5);
     text-decoration: none;
-    padding-bottom: 2px;
-    border-bottom: 2px solid transparent;
-    transition: color 0.15s, border-color 0.15s;
+    padding: 0.25rem 0.625rem;
+    border-radius: 0.5rem;
+    transition: color 0.15s, background 0.15s;
 }
 
 :slotted(.nav-link:hover) {
     color: var(--color-text);
+    background: rgba(255, 255, 255, 0.5);
 }
 
 :slotted(.nav-link--active) {
-    color: var(--color-text);
-    border-bottom-color: var(--color-accent);
+    color: var(--color-accent);
+    background: rgba(22, 163, 74, 0.08);
+    font-weight: 600;
 }
 
 .shell-actions {
@@ -117,11 +129,14 @@
 }
 
 .shell-footer {
-    border-top: 1px solid var(--color-border);
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
     padding: 1rem 1.5rem;
     text-align: center;
     font-size: 0.8rem;
     color: var(--color-text-muted);
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
 :slotted(.footer a) {
@@ -145,7 +160,7 @@
         flex: 0 0 100%;
         padding-left: 0;
         padding-top: 0.5rem;
-        border-top: 1px solid var(--color-border);
+        border-top: 1px solid rgba(0, 0, 0, 0.06);
     }
 
     .shell-main {

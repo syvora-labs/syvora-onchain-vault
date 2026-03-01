@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue'
 import { useWallet } from '../composables/useWallet'
 import { useVault } from '../composables/useVault'
-import { SyvoraCard, SyvoraInput, SyvoraButton, SyvoraStepIndicator, SyvoraAlert } from '@syvora/ui'
+import { SyvoraCard, SyvoraInput, SyvoraButton, SyvoraStepIndicator, SyvoraAlert, SyvoraEmptyState } from '@syvora/ui'
 
 const emit = defineEmits<{ deposited: [] }>()
 
@@ -43,9 +43,7 @@ async function handleDeposit() {
 
 <template>
     <SyvoraCard title="Deposit LRN">
-        <div v-if="!isConnected" class="placeholder">
-            Connect your wallet to deposit.
-        </div>
+        <SyvoraEmptyState v-if="!isConnected">Connect your wallet to deposit.</SyvoraEmptyState>
 
         <template v-else>
             <p class="info-text">

@@ -45,18 +45,28 @@ defineEmits<{
 .syvora-input {
     width: 100%;
     padding: 0.75rem 3.5rem 0.75rem 1rem;
-    background: var(--color-surface-2);
-    border: 1px solid var(--color-border);
-    border-radius: 0.5rem;
+    background: rgba(255, 255, 255, 0.58);
+    backdrop-filter: blur(10px) saturate(160%);
+    -webkit-backdrop-filter: blur(10px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.52);
+    border-radius: var(--radius-sm, 0.625rem);
     color: var(--color-text);
     font-size: 1rem;
     box-sizing: border-box;
-    transition: border-color 0.2s;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.85) inset,
+        0 1px 3px rgba(0, 0, 0, 0.04) inset;
 }
 
 .syvora-input:focus {
     outline: none;
-    border-color: var(--color-accent);
+    background: rgba(255, 255, 255, 0.72);
+    border-color: rgba(22, 163, 74, 0.4);
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.95) inset,
+        0 1px 3px rgba(0, 0, 0, 0.04) inset,
+        0 0 0 3px rgba(22, 163, 74, 0.1);
 }
 
 .syvora-input:disabled {

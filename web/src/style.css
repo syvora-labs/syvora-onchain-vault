@@ -2,6 +2,14 @@
 /* Design tokens and resets live in @syvora/ui/style.css                         */
 
 body {
-    background-image: radial-gradient(ellipse 70% 40% at 50% 0%, rgba(22, 163, 74, 0.06) 0%, transparent 70%);
+    background-color: #eef7f1;
+    background-image:
+        radial-gradient(ellipse 65% 55% at 15% 10%, rgba(134, 239, 172, 0.38) 0%, transparent 65%),
+        radial-gradient(ellipse 50% 45% at 85% 15%, rgba(147, 197, 253, 0.28) 0%, transparent 60%),
+        radial-gradient(ellipse 55% 50% at 75% 80%, rgba(196, 181, 253, 0.2) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 20% 85%, rgba(110, 231, 183, 0.22) 0%, transparent 55%),
+        radial-gradient(ellipse 80% 60% at 50% 50%, rgba(255, 255, 255, 0.55) 0%, transparent 80%),
+        linear-gradient(160deg, #e2f5ea 0%, #f0f9f4 45%, #ebf4ff 100%);
     background-attachment: fixed;
+    min-height: 100vh;
 }

@@ -8,6 +8,7 @@ import type { Profile } from '../composables/useAuth'
 import type { PostWithProfile } from '../composables/useForum'
 import PostCard from '../components/PostCard.vue'
 import EditProfileModal from '../components/EditProfileModal.vue'
+import { SyvoraAvatar, SyvoraEmptyState } from '@syvora/ui'
 
 const route = useRoute()
 const { currentProfile } = useAuth()
@@ -24,13 +25,6 @@ const username = computed(() => route.params.username as string)
 const isOwnProfile = computed(
     () => currentProfile.value?.username === username.value,
 )
-
-const avatarBg = computed(() => {
-    const name = profile.value?.username ?? ''
-    let hash = 0
-    for (const ch of name) hash = ch.charCodeAt(0) + ((hash << 5) - hash)
-    return `hsl(${Math.abs(hash) % 360}, 55%, 38%)`
-})
 
 const displayName = computed(
     () => profile.value?.display_name ?? profile.value?.username ?? '',
@@ -90,28 +84,22 @@ watch(username, load, { immediate: true })
 
 <template>
     <div class="profile-page">
-        <div v-if="isLoading" class="state-center">Loading…</div>
+        <SyvoraEmptyState v-if="isLoading">Loading…</SyvoraEmptyState>
 
-        <div v-else-if="notFound" class="state-center">
+        <SyvoraEmptyState v-else-if="notFound">
             <p>User <strong>@{{ username }}</strong> not found.</p>
-        </div>
+        </SyvoraEmptyState>
 
         <template v-else-if="profile">
             <!-- Profile header -->
             <div class="profile-header">
                 <!-- Avatar + identity row -->
                 <div class="avatar-row">
-                    <div class="avatar-wrap" :style="{ background: avatarBg }">
-                        <img
-                            v-if="profile.avatar_url"
-                            :src="profile.avatar_url"
-                            :alt="profile.username"
-                            class="avatar-img"
-                        />
-                        <span v-else class="avatar-initial">
-                            {{ profile.username.charAt(0).toUpperCase() }}
-                        </span>
-                    </div>
+                    <SyvoraAvatar
+                        :name="profile.username"
+                        :src="profile.avatar_url"
+                        size="lg"
+                    />
 
                     <div class="avatar-row-right">
                         <div class="identity">
@@ -153,9 +141,7 @@ watch(username, load, { immediate: true })
             <div class="posts-section">
                 <h2 class="section-title">Posts</h2>
 
-                <div v-if="userPosts.length === 0" class="empty-posts">
-                    No posts yet.
-                </div>
+                <SyvoraEmptyState v-if="userPosts.length === 0">No posts yet.</SyvoraEmptyState>
 
                 <div v-else class="posts-feed">
                     <PostCard
@@ -182,19 +168,13 @@ watch(username, load, { immediate: true })
     padding: 0 1rem;
 }
 
-.state-center {
-    text-align: center;
-    color: var(--color-text-muted, #888);
-    padding: 4rem 0;
-}
-
 /* Header */
 .profile-header {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
     padding-bottom: 1.5rem;
-    border-bottom: 1px solid var(--color-border, #2a2a2a);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.07);
     margin-bottom: 1.5rem;
 }
 
@@ -202,30 +182,6 @@ watch(username, load, { immediate: true })
     display: flex;
     align-items: center;
     gap: 1rem;
-}
-
-.avatar-wrap {
-    width: 5rem;
-    height: 5rem;
-    border-radius: 50%;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    border: 3px solid var(--color-bg, #121212);
-}
-
-.avatar-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.avatar-initial {
-    font-size: 2rem;
-    font-weight: 700;
-    color: #fff;
 }
 
 .avatar-row-right {
@@ -297,7 +253,7 @@ watch(username, load, { immediate: true })
     font-weight: 700;
     margin: 0 0 0.25rem;
     padding-bottom: 0.75rem;
-    border-bottom: 1px solid var(--color-border, #2a2a2a);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.07);
 }
 
 .posts-feed {
@@ -306,32 +262,29 @@ watch(username, load, { immediate: true })
     gap: 0.75rem;
 }
 
-.empty-posts {
-    color: var(--color-text-muted, #888);
-    font-size: 0.9375rem;
-    padding: 2rem 0;
-    text-align: center;
-}
-
 /* Buttons */
 .btn {
     border: none;
     border-radius: 9999px;
     cursor: pointer;
     font-size: 0.875rem;
-    font-weight: 700;
-    padding: 0.4375rem 1rem;
-    transition: opacity 0.15s;
+    font-weight: 600;
+    padding: 0.4375rem 1.125rem;
+    transition: background 0.15s, box-shadow 0.15s;
     line-height: 1;
 }
 
 .btn-ghost {
-    background: transparent;
-    border: 1px solid var(--color-border, #555);
-    color: var(--color-text, #fff);
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.52);
+    color: var(--color-text);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset, 0 1px 4px rgba(0,0,0,0.05);
 }
 
 .btn-ghost:hover {
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.82);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.95) inset, 0 2px 8px rgba(0,0,0,0.07);
 }
 </style>

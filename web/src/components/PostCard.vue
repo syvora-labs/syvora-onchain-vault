@@ -8,6 +8,7 @@ import { VAULT_ABI } from '../contracts/abis'
 import { ADDRESSES } from '../contracts/addresses'
 import type { VaultContract } from '../composables/useContracts'
 import type { PostWithProfile } from '../composables/useForum'
+import { SyvoraAvatar } from '@syvora/ui'
 
 const props = defineProps<{
     post: PostWithProfile
@@ -23,17 +24,6 @@ const vaultBalance = ref<string | null>(null)
 const isOwnPost = computed(() => currentUser.value?.id === props.post.user_id)
 
 const avatarUrl = computed(() => props.post.profiles?.avatar_url ?? null)
-
-const avatarInitial = computed(() =>
-    (props.post.profiles?.username ?? '?').charAt(0).toUpperCase()
-)
-
-const avatarBg = computed(() => {
-    const name = props.post.profiles?.username ?? ''
-    let hash = 0
-    for (const ch of name) hash = ch.charCodeAt(0) + ((hash << 5) - hash)
-    return `hsl(${Math.abs(hash) % 360}, 55%, 38%)`
-})
 
 onMounted(async () => {
     const walletAddress = props.post.profiles?.wallet_address
@@ -59,13 +49,12 @@ function timeAgo(dateStr: string): string {
 <template>
     <div class="post-card">
         <div class="post-header">
-            <RouterLink
-                :to="`/u/${post.profiles?.username}`"
-                class="post-avatar"
-                :style="{ background: avatarBg }"
-            >
-                <img v-if="avatarUrl" :src="avatarUrl" :alt="post.profiles?.username" class="avatar-img" />
-                <span v-else class="avatar-initial">{{ avatarInitial }}</span>
+            <RouterLink :to="`/u/${post.profiles?.username}`" class="avatar-link">
+                <SyvoraAvatar
+                    :name="post.profiles?.username ?? '?'"
+                    :src="avatarUrl"
+                    size="sm"
+                />
             </RouterLink>
 
             <div class="post-meta">
@@ -91,13 +80,27 @@ function timeAgo(dateStr: string): string {
 
 <style scoped>
 .post-card {
-    background: var(--color-surface, #1e1e1e);
-    border: 1px solid var(--color-border, #2a2a2a);
-    border-radius: 0.75rem;
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    border-radius: 1.125rem;
     padding: 1rem 1.25rem;
     display: flex;
     flex-direction: column;
     gap: 0.625rem;
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.85) inset,
+        0 2px 8px rgba(0, 0, 0, 0.04),
+        0 8px 24px rgba(0, 0, 0, 0.05);
+    transition: box-shadow 0.25s ease;
+}
+
+.post-card:hover {
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.95) inset,
+        0 4px 12px rgba(0, 0, 0, 0.06),
+        0 12px 32px rgba(0, 0, 0, 0.07);
 }
 
 .post-header {
@@ -107,29 +110,9 @@ function timeAgo(dateStr: string): string {
     flex-wrap: wrap;
 }
 
-.post-avatar {
-    width: 2rem;
-    height: 2rem;
-    border-radius: 50%;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
+.avatar-link {
     text-decoration: none;
-}
-
-.avatar-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.avatar-initial {
-    color: #fff;
-    font-size: 0.8125rem;
-    font-weight: 700;
-    line-height: 1;
+    flex-shrink: 0;
 }
 
 .post-meta {
@@ -158,14 +141,16 @@ function timeAgo(dateStr: string): string {
 }
 
 .vault-badge {
-    background: rgba(74, 222, 128, 0.12);
-    border: 1px solid rgba(74, 222, 128, 0.3);
+    background: rgba(22, 163, 74, 0.1);
+    border: 1px solid rgba(22, 163, 74, 0.22);
     border-radius: 9999px;
-    color: #4ade80;
+    color: #16a34a;
     font-size: 0.75rem;
-    font-weight: 500;
+    font-weight: 600;
     padding: 0.125rem 0.625rem;
     margin-left: auto;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
 .post-content {

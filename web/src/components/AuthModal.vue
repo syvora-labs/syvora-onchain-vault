@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useAuth } from '../composables/useAuth'
+import { SyvoraModal, SyvoraFormField } from '@syvora/ui'
 
 const emit = defineEmits<{ close: [] }>()
 
@@ -37,141 +38,72 @@ function switchMode(m: 'login' | 'signup') {
 </script>
 
 <template>
-    <div class="overlay" @click.self="emit('close')">
-        <div class="modal" role="dialog" aria-modal="true">
-            <div class="modal-header">
-                <h2 class="modal-title">{{ mode === 'login' ? 'Sign In' : 'Sign Up' }}</h2>
-                <button class="close-btn" aria-label="Close" @click="emit('close')">✕</button>
-            </div>
+    <SyvoraModal :title="mode === 'login' ? 'Sign In' : 'Sign Up'" size="sm" @close="emit('close')">
+        <form class="modal-form" @submit.prevent="submit">
+            <SyvoraFormField v-if="mode === 'signup'" label="Username" for="am-username">
+                <input
+                    id="am-username"
+                    v-model="username"
+                    class="field-input"
+                    type="text"
+                    placeholder="yourname"
+                    required
+                    autocomplete="username"
+                />
+            </SyvoraFormField>
 
-            <form class="modal-form" @submit.prevent="submit">
-                <div v-if="mode === 'signup'" class="field">
-                    <label class="label" for="am-username">Username</label>
-                    <input
-                        id="am-username"
-                        v-model="username"
-                        class="input"
-                        type="text"
-                        placeholder="yourname"
-                        required
-                        autocomplete="username"
-                    />
-                </div>
+            <SyvoraFormField label="Email" for="am-email">
+                <input
+                    id="am-email"
+                    v-model="email"
+                    class="field-input"
+                    type="email"
+                    placeholder="you@example.com"
+                    required
+                    autocomplete="email"
+                />
+            </SyvoraFormField>
 
-                <div class="field">
-                    <label class="label" for="am-email">Email</label>
-                    <input
-                        id="am-email"
-                        v-model="email"
-                        class="input"
-                        type="email"
-                        placeholder="you@example.com"
-                        required
-                        autocomplete="email"
-                    />
-                </div>
+            <SyvoraFormField label="Password" for="am-password">
+                <input
+                    id="am-password"
+                    v-model="password"
+                    class="field-input"
+                    type="password"
+                    placeholder="••••••••"
+                    required
+                    :autocomplete="mode === 'login' ? 'current-password' : 'new-password'"
+                />
+            </SyvoraFormField>
 
-                <div class="field">
-                    <label class="label" for="am-password">Password</label>
-                    <input
-                        id="am-password"
-                        v-model="password"
-                        class="input"
-                        type="password"
-                        placeholder="••••••••"
-                        required
-                        :autocomplete="mode === 'login' ? 'current-password' : 'new-password'"
-                    />
-                </div>
+            <div v-if="error" class="error-box">{{ error }}</div>
 
-                <div v-if="error" class="error-box">{{ error }}</div>
+            <button class="submit-btn" type="submit" :disabled="loading">
+                {{ loading ? 'Please wait…' : mode === 'login' ? 'Sign In' : 'Create Account' }}
+            </button>
+        </form>
 
-                <button class="submit-btn" type="submit" :disabled="loading">
-                    {{ loading ? 'Please wait…' : mode === 'login' ? 'Sign In' : 'Create Account' }}
-                </button>
-            </form>
-
-            <p class="toggle-text">
-                <template v-if="mode === 'login'">
-                    No account?
-                    <button class="link-btn" type="button" @click="switchMode('signup')">Sign Up</button>
-                </template>
-                <template v-else>
-                    Already have an account?
-                    <button class="link-btn" type="button" @click="switchMode('login')">Sign In</button>
-                </template>
-            </p>
-        </div>
-    </div>
+        <p class="toggle-text">
+            <template v-if="mode === 'login'">
+                No account?
+                <button class="link-btn" type="button" @click="switchMode('signup')">Sign Up</button>
+            </template>
+            <template v-else>
+                Already have an account?
+                <button class="link-btn" type="button" @click="switchMode('login')">Sign In</button>
+            </template>
+        </p>
+    </SyvoraModal>
 </template>
 
 <style scoped>
-.overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    padding: 1rem;
-}
-
-.modal {
-    background: var(--color-surface, #1e1e1e);
-    border: 1px solid var(--color-border, #333);
-    border-radius: 0.75rem;
-    padding: 2rem;
-    width: 100%;
-    max-width: 420px;
-}
-
-.modal-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 1.5rem;
-}
-
-.modal-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin: 0;
-}
-
-.close-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--color-text-muted, #888);
-    font-size: 1rem;
-    line-height: 1;
-    padding: 0.25rem 0.5rem;
-}
-
-.close-btn:hover {
-    color: var(--color-text, #fff);
-}
-
 .modal-form {
     display: flex;
     flex-direction: column;
     gap: 1rem;
 }
 
-.field {
-    display: flex;
-    flex-direction: column;
-    gap: 0.375rem;
-}
-
-.label {
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--color-text-muted, #aaa);
-}
-
-.input {
+.field-input {
     background: var(--color-bg, #111);
     border: 1px solid var(--color-border, #333);
     border-radius: 0.5rem;
@@ -184,7 +116,7 @@ function switchMode(m: 'login' | 'signup') {
     transition: border-color 0.15s;
 }
 
-.input:focus {
+.field-input:focus {
     border-color: var(--color-accent, #4ade80);
 }
 
@@ -223,7 +155,7 @@ function switchMode(m: 'login' | 'signup') {
 .toggle-text {
     font-size: 0.875rem;
     color: var(--color-text-muted, #888);
-    margin: 1.25rem 0 0;
+    margin: 0;
     text-align: center;
 }
 

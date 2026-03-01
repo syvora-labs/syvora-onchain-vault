@@ -33,24 +33,32 @@ defineEmits<{ dismiss: [] }>()
 }
 
 .syvora-alert--warning {
-    background: #fef9ec;
-    border-bottom: 1px solid #f0d060;
+    background: rgba(253, 245, 230, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(240, 180, 60, 0.4);
     color: #7a5800;
 }
 
 .syvora-alert--error {
-    background: rgba(220, 38, 38, 0.08);
+    background: rgba(254, 242, 242, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(220, 38, 38, 0.2);
-    border-radius: 0.5rem;
+    border-radius: var(--radius-sm, 0.625rem);
     color: var(--color-error);
     font-size: 0.875rem;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.7) inset;
 }
 
 .syvora-alert--info {
-    background: var(--color-surface-2);
-    border: 1px solid var(--color-border);
-    border-radius: 0.5rem;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: var(--radius-sm, 0.625rem);
     color: var(--color-text);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset;
 }
 
 .syvora-alert-content {

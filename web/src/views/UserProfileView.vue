@@ -4,21 +4,26 @@ import { useRoute } from 'vue-router'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../composables/useAuth'
 import { useForum } from '../composables/useForum'
+import { useSocial } from '../composables/useSocial'
 import type { Profile } from '../composables/useAuth'
 import type { PostWithProfile } from '../composables/useForum'
+import type { FollowStats } from '../composables/useSocial'
 import PostCard from '../components/PostCard.vue'
 import EditProfileModal from '../components/EditProfileModal.vue'
 import { SyvoraAvatar, SyvoraEmptyState } from '@syvora/ui'
 
 const route = useRoute()
-const { currentProfile } = useAuth()
+const { currentProfile, currentUser, isAuthenticated } = useAuth()
 const { fetchPostsByUser, deletePost } = useForum()
+const { isFollowing, followUser, unfollowUser, fetchFollowingIds, getFollowStats } = useSocial()
 
 const profile = ref<Profile | null>(null)
 const userPosts = ref<PostWithProfile[]>([])
+const followStats = ref<FollowStats>({ followers_count: 0, following_count: 0 })
 const isLoading = ref(true)
 const notFound = ref(false)
 const showEditModal = ref(false)
+const followPending = ref(false)
 
 const username = computed(() => route.params.username as string)
 
@@ -38,11 +43,18 @@ const joinedDate = computed(() => {
     })
 })
 
+const canFollow = computed(
+    () => isAuthenticated.value && !isOwnProfile.value && profile.value !== null,
+)
+
+const following = computed(() => profile.value ? isFollowing(profile.value.id) : false)
+
 async function load() {
     isLoading.value = true
     notFound.value = false
     profile.value = null
     userPosts.value = []
+    followStats.value = { followers_count: 0, following_count: 0 }
 
     const { data } = await supabase
         .from('profiles')
@@ -57,7 +69,19 @@ async function load() {
     }
 
     profile.value = data as Profile
-    userPosts.value = await fetchPostsByUser(data.id)
+
+    const [posts, stats] = await Promise.all([
+        fetchPostsByUser(data.id),
+        getFollowStats(data.id),
+    ])
+    userPosts.value = posts
+    followStats.value = stats
+
+    // Load who the current user follows so the Follow button is accurate
+    if (currentUser.value) {
+        await fetchFollowingIds(currentUser.value.id)
+    }
+
     isLoading.value = false
 }
 
@@ -68,7 +92,6 @@ async function handleDelete(id: string) {
 
 async function handleEditClose() {
     showEditModal.value = false
-    // Reload profile to reflect updated data
     if (profile.value) {
         const { data } = await supabase
             .from('profiles')
@@ -76,6 +99,22 @@ async function handleEditClose() {
             .eq('id', profile.value.id)
             .single()
         if (data) profile.value = data as Profile
+    }
+}
+
+async function handleFollow() {
+    if (!profile.value || followPending.value) return
+    followPending.value = true
+    try {
+        if (following.value) {
+            await unfollowUser(profile.value.id)
+            followStats.value.followers_count = Math.max(0, followStats.value.followers_count - 1)
+        } else {
+            await followUser(profile.value.id)
+            followStats.value.followers_count += 1
+        }
+    } finally {
+        followPending.value = false
     }
 }
 
@@ -113,6 +152,15 @@ watch(username, load, { immediate: true })
                         >
                             Edit profile
                         </button>
+                        <button
+                            v-else-if="canFollow"
+                            class="btn"
+                            :class="following ? 'btn-ghost' : 'btn-primary'"
+                            :disabled="followPending"
+                            @click="handleFollow"
+                        >
+                            {{ followPending ? '…' : following ? 'Unfollow' : 'Follow' }}
+                        </button>
                     </div>
                 </div>
 
@@ -134,6 +182,12 @@ watch(username, load, { immediate: true })
                 <div class="meta-row">
                     <span class="meta-item">Joined {{ joinedDate }}</span>
                     <span class="meta-item">{{ userPosts.length }} posts</span>
+                    <span class="meta-item">
+                        <strong>{{ followStats.followers_count }}</strong> followers
+                    </span>
+                    <span class="meta-item">
+                        <strong>{{ followStats.following_count }}</strong> following
+                    </span>
                 </div>
             </div>
 
@@ -241,6 +295,11 @@ watch(username, load, { immediate: true })
     color: var(--color-text-muted, #888);
 }
 
+.meta-item strong {
+    color: var(--color-text, #111);
+    font-weight: 700;
+}
+
 /* Posts */
 .posts-section {
     display: flex;
@@ -270,8 +329,26 @@ watch(username, load, { immediate: true })
     font-size: 0.875rem;
     font-weight: 600;
     padding: 0.4375rem 1.125rem;
-    transition: background 0.15s, box-shadow 0.15s;
+    transition: background 0.15s, box-shadow 0.15s, opacity 0.15s;
     line-height: 1;
+    white-space: nowrap;
+}
+
+.btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+}
+
+.btn-primary {
+    background: linear-gradient(160deg, #34d067 0%, #16a34a 55%, #15803d 100%);
+    color: #fff;
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.3) inset,
+        0 3px 10px rgba(22, 163, 74, 0.28);
+}
+
+.btn-primary:hover:not(:disabled) {
+    opacity: 0.9;
 }
 
 .btn-ghost {
@@ -283,7 +360,7 @@ watch(username, load, { immediate: true })
     box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset, 0 1px 4px rgba(0,0,0,0.05);
 }
 
-.btn-ghost:hover {
+.btn-ghost:hover:not(:disabled) {
     background: rgba(255, 255, 255, 0.82);
     box-shadow: 0 1px 0 rgba(255, 255, 255, 0.95) inset, 0 2px 8px rgba(0,0,0,0.07);
 }
